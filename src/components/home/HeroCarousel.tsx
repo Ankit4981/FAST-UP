@@ -14,7 +14,7 @@ const slides = [
     secondaryCta: "Explore hydration",
     href: "/products",
     secondaryHref: "/products?search=hydration",
-    image: "/products/reload-electrolyte.svg",
+    image: "/products/reload-electrolyte.webp",
     imageAlt: "Reload Electrolyte tube",
     className: "from-brand-black via-neutral-950 to-[#2a1409]"
   },
@@ -26,7 +26,7 @@ const slides = [
     secondaryCta: "Build a stack",
     href: "/products/reload-electrolyte",
     secondaryHref: "/products?category=Bundles",
-    image: "/products/marathon-bundle.svg",
+    image: "/products/marathon-bundle.webp",
     imageAlt: "Marathon hydration bundle",
     className: "from-[#06291c] via-[#0c3f2b] to-[#062a33]"
   },
@@ -38,7 +38,7 @@ const slides = [
     secondaryCta: "Shop protein",
     href: "#ai-coach",
     secondaryHref: "/products?search=protein",
-    image: "/products/plant-protein.svg",
+    image: "/products/plant-protein.webp",
     imageAlt: "Plant Protein Performance pack",
     className: "from-[#111111] via-[#30210d] to-[#6b2108]"
   }
