@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 
 import { SignupForm } from "@/components/auth/SignupForm";
@@ -11,7 +12,9 @@ export default function SignupPage() {
   return (
     <section className="bg-brand-grey py-12">
       <div className="container-page">
-        <SignupForm />
+        <Suspense fallback={null}>
+          <SignupForm />
+        </Suspense>
       </div>
     </section>
   );

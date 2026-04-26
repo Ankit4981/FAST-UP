@@ -11,7 +11,7 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, Suspense, useMemo, useState } from "react";
 
 import { useCartStore } from "@/store/cartStore";
 
@@ -48,15 +48,50 @@ const navItems = [
   }
 ];
 
+// Isolated component so useSearchParams doesn't block static page rendering
+function ActiveNavLinks({ pathname }: { pathname: string }) {
+  const searchParams = useSearchParams();
+  const activeCategory = searchParams.get("category");
+
+  return (
+    <>
+      {navItems.map((item) => (
+        <div key={item.label} className="group relative">
+          <Link
+            href={item.href}
+            className={`flex h-12 items-center gap-1 px-3 text-sm font-bold transition ${
+              pathname === "/products" && activeCategory === item.category
+                ? "text-brand-orange"
+                : "text-neutral-700 hover:text-brand-orange"
+            }`}
+          >
+            {item.label}
+            <ChevronDown size={15} className="transition group-hover:rotate-180" />
+          </Link>
+          <div className="invisible absolute left-0 top-full z-20 min-w-60 translate-y-2 rounded-lg border border-neutral-200 bg-white py-2 opacity-0 shadow-lift transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+            {item.children.map((child) => (
+              <Link
+                key={child}
+                href={`/products?search=${encodeURIComponent(child)}`}
+                className="block px-4 py-2.5 text-sm font-semibold text-neutral-700 transition hover:bg-brand-grey hover:text-brand-orange"
+              >
+                {child}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
 export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const [query, setQuery] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const items = useCartStore((state) => state.items);
-  const activeCategory = searchParams.get("category");
 
   const cartCount = useMemo(
     () => items.reduce((total, item) => total + item.quantity, 0),
@@ -177,32 +212,10 @@ export function Navbar() {
       <nav className="hidden border-t border-neutral-100 bg-white lg:block" aria-label="Primary navigation">
         <div className="container-page flex items-center justify-between">
           <div className="flex items-center">
-            {navItems.map((item) => (
-              <div key={item.label} className="group relative">
-                <Link
-                  href={item.href}
-                  className={`flex h-12 items-center gap-1 px-3 text-sm font-bold transition ${
-                    pathname === "/products" && activeCategory === item.category
-                      ? "text-brand-orange"
-                      : "text-neutral-700 hover:text-brand-orange"
-                  }`}
-                >
-                  {item.label}
-                  <ChevronDown size={15} className="transition group-hover:rotate-180" />
-                </Link>
-                <div className="invisible absolute left-0 top-full z-20 min-w-60 translate-y-2 rounded-lg border border-neutral-200 bg-white py-2 opacity-0 shadow-lift transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-                  {item.children.map((child) => (
-                    <Link
-                      key={child}
-                      href={`/products?search=${encodeURIComponent(child)}`}
-                      className="block px-4 py-2.5 text-sm font-semibold text-neutral-700 transition hover:bg-brand-grey hover:text-brand-orange"
-                    >
-                      {child}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
+            {/* Suspense required because ActiveNavLinks uses useSearchParams */}
+            <Suspense fallback={null}>
+              <ActiveNavLinks pathname={pathname} />
+            </Suspense>
           </div>
           <Link
             href="/products"
