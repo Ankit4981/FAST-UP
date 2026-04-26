@@ -1,0 +1,15 @@
+<svg width="800" height="800" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="800" rx="64" fill="#F5F5F5"/>
+  <rect x="98" y="540" width="604" height="80" rx="28" fill="#111111"/>
+  <rect x="160" y="226" width="166" height="330" rx="36" fill="#1E90FF"/>
+  <rect x="318" y="160" width="184" height="396" rx="42" fill="#F26522"/>
+  <rect x="490" y="246" width="150" height="310" rx="34" fill="#169B62"/>
+  <rect x="184" y="304" width="118" height="170" rx="18" fill="#FFFFFF"/>
+  <rect x="348" y="256" width="124" height="220" rx="20" fill="#FFFFFF"/>
+  <rect x="514" y="320" width="102" height="154" rx="18" fill="#FFFFFF"/>
+  <text x="243" y="376" text-anchor="middle" font-family="Arial Black, Arial" font-size="27" fill="#111111">RELOAD</text>
+  <text x="410" y="342" text-anchor="middle" font-family="Arial Black, Arial" font-size="29" fill="#111111">ACTIVATE</text>
+  <text x="565" y="386" text-anchor="middle" font-family="Arial Black, Arial" font-size="25" fill="#111111">RECOVER</text>
+  <text x="400" y="616" text-anchor="middle" font-family="Arial Black, Arial" font-size="54" fill="#FFFFFF">MARATHON BUNDLE</text>
+  <text x="400" y="682" text-anchor="middle" font-family="Arial" font-size="27" font-weight="700" fill="#F26522">PRE + DURING + POST</text>
+</svg>
