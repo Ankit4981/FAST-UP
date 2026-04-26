@@ -10,7 +10,7 @@ export const seedProducts: Product[] = [
     description: "Hydration tablets with five essential electrolytes for training, travel and hot days.",
     longDescription:
       "An effervescent hydration blend built for runners, cyclists, gym-goers and everyday active people. It helps replenish sodium, potassium, magnesium, chloride and calcium without heavy sugar.",
-    images: ["/products/reload-electrolyte.svg"],
+    images: ["/products/reload-electrolyte.webp"],
     category: "Sports Nutrition",
     rating: 4.8,
     reviewCount: 4821,
@@ -65,7 +65,7 @@ export const seedProducts: Product[] = [
     description: "Daily effervescent multivitamin with essential vitamins and minerals.",
     longDescription:
       "A daily wellness tablet for busy routines, supporting immunity, energy metabolism and micronutrient intake with a refreshing citrus profile.",
-    images: ["/products/vitalize-multivitamin.svg"],
+    images: ["/products/vitalize-multivitamin.webp"],
     category: "Daily Nutrition",
     rating: 4.5,
     reviewCount: 2089,
@@ -91,7 +91,7 @@ export const seedProducts: Product[] = [
     description: "Post-workout recovery support with BCAA, glutamine and electrolytes.",
     longDescription:
       "Built for athletes who train repeatedly through the week. Supports muscle recovery, hydration and soreness management after high-output sessions.",
-    images: ["/products/recover-bcaa.svg"],
+    images: ["/products/recover-bcaa.webp"],
     category: "Sports Nutrition",
     rating: 4.9,
     reviewCount: 5612,
@@ -118,7 +118,7 @@ export const seedProducts: Product[] = [
     description: "Complete vegan protein blend for lean muscle and daily recovery.",
     longDescription:
       "A plant-forward protein built with pea and brown rice protein, digestive enzymes and balanced amino acids for everyday performance nutrition.",
-    images: ["/products/plant-protein.svg"],
+    images: ["/products/plant-protein.webp"],
     category: "Plant Power",
     rating: 4.6,
     reviewCount: 1744,
@@ -144,7 +144,7 @@ export const seedProducts: Product[] = [
     description: "Beauty nutrition support for skin hydration, hair strength and glow.",
     longDescription:
       "A women's nutrition blend with collagen peptides, vitamin C, biotin and antioxidants to support skin, hair and nail wellness.",
-    images: ["/products/collagen-glow.svg"],
+    images: ["/products/collagen-glow.webp"],
     category: "Women's Nutrition",
     rating: 4.4,
     reviewCount: 1258,
@@ -170,7 +170,7 @@ export const seedProducts: Product[] = [
     description: "Kid-friendly immunity support with vitamin C, zinc and playful flavours.",
     longDescription:
       "A gentle daily supplement designed for kids, with bright flavours and core nutrients that support immune health and active growth.",
-    images: ["/products/kids-immunity.svg"],
+    images: ["/products/kids-immunity.webp"],
     category: "Kidz Nutrition",
     rating: 4.3,
     reviewCount: 942,
@@ -196,7 +196,7 @@ export const seedProducts: Product[] = [
     description: "Race-day bundle with hydration, energy and recovery essentials.",
     longDescription:
       "A high-value endurance stack for long runs and race weeks, combining pre-run energy, electrolyte reload and recovery nutrition.",
-    images: ["/products/marathon-bundle.svg"],
+    images: ["/products/marathon-bundle.webp"],
     category: "Bundles",
     rating: 4.8,
     reviewCount: 2156,
@@ -234,7 +234,7 @@ export const demoOrders: Order[] = [
         productId: "prod_reload_electrolyte",
         name: "Reload Electrolyte",
         slug: "reload-electrolyte",
-        image: "/products/reload-electrolyte.svg",
+        image: "/products/reload-electrolyte.webp",
         price: 559,
         quantity: 2
       }
