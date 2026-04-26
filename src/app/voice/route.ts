@@ -4,23 +4,31 @@ import { z } from "zod";
 
 import { checkRateLimit, getClientIp, rateLimitHeaders } from "@/lib/rateLimit";
 
-// ─── Clients ──────────────────────────────────────────────────────────────────
+// ─── Constants ─────────────────────────────────────────────────────────────────
+const REQUEST_TIMEOUT_MS = 9_000; // 9 s hard cap
+const OLLAMA_MODEL       = process.env.OLLAMA_MODEL       ?? "llama3:8b";
+const OLLAMA_BASE_URL    = process.env.OLLAMA_BASE_URL    ?? "http://localhost:11434/v1";
 
-const ollamaClient = new OpenAI({
-  baseURL: process.env.OLLAMA_BASE_URL ?? "http://localhost:11434/v1",
-  apiKey:  "ollama",
-});
+const GROQ_MODEL = "llama-3.1-8b-instant";
 
-// Groq is OpenAI-compatible — same SDK, different base + key
-const groqClient = new OpenAI({
-  baseURL: "https://api.groq.com/openai/v1",
-  apiKey:  process.env.GROQ_API_KEY ?? "missing",
-});
+// ─── Clients (lazy — created only when needed) ─────────────────────────────────
+function getOllamaClient() {
+  return new OpenAI({
+    baseURL: OLLAMA_BASE_URL,
+    apiKey:  "ollama", // Ollama doesn't need a real key
+  });
+}
 
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? "llama3:8b";
-const GROQ_MODEL   = "llama3-8b-8192";
+function getGroqClient() {
+  const key = process.env.GROQ_API_KEY;
+  if (!key) throw new Error("GROQ_API_KEY is not configured");
+  return new OpenAI({
+    baseURL: "https://api.groq.com/openai/v1",
+    apiKey:  key,
+  });
+}
 
-// ─── Validation schema ────────────────────────────────────────────────────────
+// ─── Validation schema ─────────────────────────────────────────────────────────
 const voiceSchema = z.object({
   messages: z
     .array(
@@ -30,51 +38,74 @@ const voiceSchema = z.object({
       })
     )
     .min(1)
-    .max(10),
+    .max(20),  // frontend MAX_HISTORY=12; keep headroom
+  lang: z.enum(["en", "hi"]).optional().default("en"),
 });
 
-// ─── System prompt ────────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `
-You are a friendly Fast and Up nutrition coach on a LIVE VOICE CALL.
-STRICT RULES — follow every one:
+// ─── System prompt ─────────────────────────────────────────────────────────────
+// System prompt is language-aware — built per request
+function buildSystemPrompt(lang: "en" | "hi"): string {
+  const base = lang === "hi"
+    ? `Aap Coach Priya hain, Fast and Up ki friendly nutrition coach ek LIVE VOICE CALL par.
+SAKHT NIYAM — ek bhi mat todo:
+1. BILKUL EK sentence mein jawab do. Isse zyada nahi. Koi exception nahi.
+2. Maximum 20 words. Gino.
+3. Bullet points, lists, markdown, asterisks ya numbers kabhi mat use karo.
+4. Warm, natural insaan ki tarah bolo — robot ki tarah nahi.
+5. Sirf Fast and Up products ka zikr karo: protein, hydration, pre-workout, recovery.
+6. Agar pata nahi, ek chhoti sentence mein bolo aur kuch aur help offer karo.
+Real-time voice call hai. Ek sentence, 20 se kam words, har baar.`
+    : `You are Coach Priya, a friendly Fast and Up nutrition coach on a LIVE VOICE CALL.
+STRICT RULES — break none of them:
 1. Reply in EXACTLY 1 sentence. Never more. No exceptions.
-2. Never use bullet points, lists, markdown, asterisks, or numbers.
-3. Sound like a warm, natural human — not a robot reading a script.
-4. Only mention Fast and Up products: protein, hydration, pre-workout, recovery.
-5. If you do not know something, say so in one sentence and offer to help differently.
-Remember: This is a real-time voice call. One sentence. Every time.
-`.trim();
+2. Maximum 20 words. Count them.
+3. Never use bullet points, lists, markdown, asterisks, or numbers.
+4. Sound like a warm, natural human — not a robot.
+5. Only mention Fast and Up products: protein, hydration, pre-workout, recovery.
+6. If unsure, say so in one short sentence and offer to help differently.
+This is real-time voice. One sentence, under 20 words, every single time.`;
+  return base.trim();
+}
 
-// ─── Fallback responses ───────────────────────────────────────────────────────
+// ─── Fallbacks ─────────────────────────────────────────────────────────────────
 const FALLBACKS = [
-  "Sorry, I didn't catch that — could you say that again?",
-  "I'm having a small hiccup. Can you repeat that for me?",
-  "My apologies — something went wrong on my end. Please try once more!",
+  "Sorry, could you say that again?",
+  "I missed that — can you repeat it?",
+  "Something went wrong on my end, please try again!",
 ];
+const randomFallback = () => FALLBACKS[Math.floor(Math.random() * FALLBACKS.length)];
 
-const randomFallback = () =>
-  FALLBACKS[Math.floor(Math.random() * FALLBACKS.length)];
-
-// ─── Shared completion options ────────────────────────────────────────────────
+// ─── Shared completion options ─────────────────────────────────────────────────
 const completionOptions = (
-  messages: { role: "user" | "assistant"; content: string }[]
+  messages: { role: "user" | "assistant"; content: string }[],
+  lang: "en" | "hi" = "en"
 ) => ({
   messages: [
-    { role: "system" as const, content: SYSTEM_PROMPT },
-    ...messages.slice(-6),          // last 6 turns max
+    { role: "system" as const, content: buildSystemPrompt(lang) },
+    ...messages.slice(-6), // last 6 turns only
   ],
-  temperature: 0.7,
-  max_tokens:  60,
+  temperature: 0.4,   // lower = faster + more consistent
+  max_tokens:  40,    // 1 sentence never needs more than 40 tokens
 });
 
-// ─── Route handler ────────────────────────────────────────────────────────────
+// ─── Timeout wrapper ───────────────────────────────────────────────────────────
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`Request timed out after ${ms}ms`)), ms)
+    ),
+  ]);
+}
+
+// ─── Route handler ─────────────────────────────────────────────────────────────
 export async function POST(request: Request) {
-  // Rate limit
+  // ── Rate limit ──
   const ip        = getClientIp(request);
   const rateLimit = checkRateLimit({
     key:      `voice-chat:${ip}`,
     limit:    30,
-    windowMs: 60 * 1000,
+    windowMs: 60_000,
   });
 
   if (!rateLimit.allowed) {
@@ -84,81 +115,103 @@ export async function POST(request: Request) {
     );
   }
 
-  // Validate body
+  // ── Parse & validate body ──
   const rawBody = await request.json().catch(() => null);
   const parsed  = voiceSchema.safeParse(rawBody);
 
   if (!parsed.success) {
     return NextResponse.json(
-      { message: randomFallback() },
+      { message: "Invalid request body." },
       { status: 400 }
     );
   }
 
+  // ── Feature flag — must match .env.local key exactly ──
   const useOllama = process.env.NEXT_PUBLIC_USE_OLLAMA === "true";
+  const lang      = parsed.data.lang ?? "en";
 
-  // LOCAL: Ollama
+  // ── LOCAL: Ollama ──
   if (useOllama) {
     try {
-      const response = await ollamaClient.chat.completions.create({
-        model: OLLAMA_MODEL,
-        ...completionOptions(parsed.data.messages),
-      });
+      const response = await withTimeout(
+        getOllamaClient().chat.completions.create({
+          model: OLLAMA_MODEL,
+          ...completionOptions(parsed.data.messages, lang),
+        }),
+        REQUEST_TIMEOUT_MS
+      );
 
-      const message =
-        response.choices[0]?.message?.content?.trim() ?? randomFallback();
-
+      const message = response.choices[0]?.message?.content?.trim() ?? randomFallback();
       return NextResponse.json(
         { message },
         { status: 200, headers: rateLimitHeaders(rateLimit) }
       );
     } catch (error) {
-      console.error("[voice/route] Ollama error:", error);
+      const errMsg = error instanceof Error ? error.message : String(error);
+      console.error("[voice/route] Ollama error:", errMsg);
 
       const isOffline =
         error instanceof Error &&
-        (error.message.includes("ECONNREFUSED") ||
-          error.message.includes("fetch failed") ||
-          error.message.includes("ENOTFOUND"));
+        (errMsg.includes("ECONNREFUSED") ||
+          errMsg.includes("fetch failed") ||
+          errMsg.includes("ENOTFOUND"));
+
+      const isTimeout = errMsg.includes("timed out");
 
       return NextResponse.json(
         {
           message: isOffline
-            ? "My AI assistant is offline right now — make sure Ollama is running!"
+            ? "My assistant is offline — make sure Ollama is running!"
+            : isTimeout
+            ? "That took too long — please try again!"
             : randomFallback(),
         },
-        { status: 200, headers: rateLimitHeaders(rateLimit) }
+        { status: 503, headers: rateLimitHeaders(rateLimit) }
       );
     }
   }
 
-  // PRODUCTION: Groq
-  if (!process.env.GROQ_API_KEY) {
+  // ── PRODUCTION: Groq ──
+  let groqClient: OpenAI;
+  try {
+    groqClient = getGroqClient();
+  } catch {
     console.error("[voice/route] GROQ_API_KEY is not set");
     return NextResponse.json(
       { message: randomFallback() },
-      { status: 200, headers: rateLimitHeaders(rateLimit) }
+      { status: 500, headers: rateLimitHeaders(rateLimit) }
     );
   }
 
   try {
-    const response = await groqClient.chat.completions.create({
-      model: GROQ_MODEL,
-      ...completionOptions(parsed.data.messages),
-    });
+    const response = await withTimeout(
+      groqClient.chat.completions.create({
+        model: GROQ_MODEL,
+        ...completionOptions(parsed.data.messages, lang),
+      }),
+      REQUEST_TIMEOUT_MS
+    );
 
-    const message =
-      response.choices[0]?.message?.content?.trim() ?? randomFallback();
-
+    const message = response.choices[0]?.message?.content?.trim() ?? randomFallback();
     return NextResponse.json(
       { message },
       { status: 200, headers: rateLimitHeaders(rateLimit) }
     );
   } catch (error) {
-    console.error("[voice/route] Groq error:", error);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error("[voice/route] Groq error:", errMsg);
+
+    const isTimeout = errMsg.includes("timed out");
+    const isAuth    = errMsg.includes("401") || errMsg.includes("invalid_api_key");
     return NextResponse.json(
-      { message: randomFallback() },
-      { status: 200, headers: rateLimitHeaders(rateLimit) }
+      {
+        message: isAuth
+          ? "AI key issue — check GROQ_API_KEY in your env file!"
+          : isTimeout
+          ? "That took too long — please try again!"
+          : randomFallback(),
+      },
+      { status: 503, headers: rateLimitHeaders(rateLimit) }
     );
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -46,14 +46,35 @@ const slides = [
 
 export function HeroCarousel() {
   const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const applyPreference = () => {
+      setPrefersReducedMotion(media.matches);
+      if (media.matches) {
+        setPaused(true);
+      }
+    };
+
+    applyPreference();
+    media.addEventListener("change", applyPreference);
+
+    return () => media.removeEventListener("change", applyPreference);
+  }, []);
+
+  useEffect(() => {
+    if (paused || prefersReducedMotion) {
+      return;
+    }
+
     const timer = window.setInterval(() => {
       setActive((current) => (current + 1) % slides.length);
     }, 5200);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [paused, prefersReducedMotion]);
 
   const slide = slides[active];
 
@@ -62,9 +83,15 @@ export function HeroCarousel() {
       className={`relative isolate overflow-hidden bg-gradient-to-br ${slide.className}`}
       aria-roledescription="carousel"
       aria-label="Featured products"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => {
+        if (!prefersReducedMotion) {
+          setPaused(false);
+        }
+      }}
     >
       <div className="container-page grid min-h-[560px] items-center gap-8 py-10 sm:min-h-[620px] lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.9fr)] lg:py-0">
-        <div className="relative z-10 max-w-2xl text-white" aria-live="polite">
+        <div className="relative z-10 max-w-2xl text-white" aria-live={paused ? "polite" : "off"}>
           <p className="mb-5 inline-flex rounded-full bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-orange ring-1 ring-white/15">
             {slide.eyebrow}
           </p>
@@ -147,6 +174,16 @@ export function HeroCarousel() {
           />
         ))}
       </div>
+
+      <button
+        type="button"
+        onClick={() => setPaused((current) => !current)}
+        className="absolute right-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/25 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-white backdrop-blur transition hover:border-white"
+        aria-label={paused ? "Resume carousel autoplay" : "Pause carousel autoplay"}
+      >
+        {paused ? <Play size={14} aria-hidden /> : <Pause size={14} aria-hidden />}
+        {paused ? "Play" : "Pause"}
+      </button>
     </section>
   );
 }

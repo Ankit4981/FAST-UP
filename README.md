@@ -5,20 +5,12 @@ Production-grade sports nutrition ecommerce app built with Next.js App Router, T
 ## Features
 
 - Responsive Fast&Up-inspired UI: home, product listing, detail, cart, checkout, dashboard, auth and footer.
-<<<<<<< HEAD
-- Dynamic product APIs with category, tag, price and search filtering, sorting and pagination.
-=======
 - Dynamic product APIs with category, tag, price and search filtering plus sorting.
->>>>>>> fd0b9a8 (feat: initialize Next.js storefront project with authentication, product catalog, and AI chat integration)
 - MongoDB-backed products, users and orders with local seed fallback for quick demos.
 - Zustand cart with localStorage persistence and real-time totals.
 - NextAuth credentials login/signup. Demo login: `demo@fastup.dev` / `Demo@1234`.
 - Checkout order creation with backend price calculation.
 - Floating AI chatbot using the OpenAI Responses API and live product, FAQ and order context.
-<<<<<<< HEAD
-- Basic API hardening with payload validation, safer error responses and in-memory rate limits.
-=======
->>>>>>> fd0b9a8 (feat: initialize Next.js storefront project with authentication, product catalog, and AI chat integration)
 
 ## Environment
 

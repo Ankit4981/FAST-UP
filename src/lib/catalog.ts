@@ -5,6 +5,7 @@ import type { Product, ProductQuery } from "@/types";
 import type { SortOrder } from "mongoose";
 
 const DEFAULT_LIMIT = 100;
+const MAX_LIMIT = 120;
 
 function escapeRegex(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -48,6 +49,24 @@ async function ensureProductsSeeded() {
   }
 }
 
+function normalizeLimit(limit?: number) {
+  const parsed = Number(limit);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return DEFAULT_LIMIT;
+  }
+
+  return Math.min(Math.floor(parsed), MAX_LIMIT);
+}
+
+function normalizeOffset(offset?: number) {
+  const parsed = Number(offset);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return 0;
+  }
+
+  return Math.floor(parsed);
+}
+
 function applyMemoryFilters(products: Product[], query: ProductQuery) {
   let result = [...products];
 
@@ -85,7 +104,13 @@ function applyMemoryFilters(products: Product[], query: ProductQuery) {
     result = result.filter((product) => product.price <= Number(query.maxPrice));
   }
 
-  switch (query.sort) {
+  return result;
+}
+
+function sortProducts(products: Product[], sort?: ProductQuery["sort"]) {
+  const result = [...products];
+
+  switch (sort) {
     case "price-asc":
       result.sort((a, b) => a.price - b.price);
       break;
@@ -102,31 +127,17 @@ function applyMemoryFilters(products: Product[], query: ProductQuery) {
       result.sort((a, b) => Number(b.featured) - Number(a.featured) || b.rating - a.rating);
   }
 
-  return result.slice(0, query.limit ?? DEFAULT_LIMIT);
+  return result;
 }
 
-function getMongoSort(sort?: ProductQuery["sort"]): Record<string, SortOrder> {
-  switch (sort) {
-    case "price-asc":
-      return { price: 1 };
-    case "price-desc":
-      return { price: -1 };
-    case "rating-desc":
-      return { rating: -1 };
-    case "newest":
-      return { createdAt: -1 };
-    default:
-      return { featured: -1, rating: -1 };
-  }
+function paginateProducts(products: Product[], query: ProductQuery) {
+  const limit = normalizeLimit(query.limit);
+  const offset = normalizeOffset(query.offset);
+
+  return products.slice(offset, offset + limit);
 }
 
-export async function getProducts(query: ProductQuery = {}) {
-  if (!isDatabaseConfigured()) {
-    return applyMemoryFilters(seedProducts, query);
-  }
-
-  await ensureProductsSeeded();
-
+function buildMongoFilter(query: ProductQuery) {
   const filter: Record<string, unknown> = {};
 
   if (query.category) {
@@ -134,7 +145,9 @@ export async function getProducts(query: ProductQuery = {}) {
   }
 
   if (query.tags?.length) {
-    filter.tags = { $all: query.tags };
+    filter.$and = query.tags.map((tag) => ({
+      $or: [{ tags: tag }, { goalTags: tag }]
+    }));
   }
 
   if (typeof query.minPrice === "number" || typeof query.maxPrice === "number") {
@@ -159,14 +172,60 @@ export async function getProducts(query: ProductQuery = {}) {
     ];
   }
 
+  return filter;
+}
+
+function applyMemorySortAndPagination(products: Product[], query: ProductQuery) {
+  const sorted = sortProducts(products, query.sort);
+  return paginateProducts(sorted, query);
+}
+
+function getMongoSort(sort?: ProductQuery["sort"]): Record<string, SortOrder> {
+  switch (sort) {
+    case "price-asc":
+      return { price: 1 };
+    case "price-desc":
+      return { price: -1 };
+    case "rating-desc":
+      return { rating: -1 };
+    case "newest":
+      return { createdAt: -1 };
+    default:
+      return { featured: -1, rating: -1 };
+  }
+}
+
+export async function getProducts(query: ProductQuery = {}) {
+  if (!isDatabaseConfigured()) {
+    const filtered = applyMemoryFilters(seedProducts, query);
+    return applyMemorySortAndPagination(filtered, query);
+  }
+
+  await ensureProductsSeeded();
+
+  const filter = buildMongoFilter(query);
+  const limit = normalizeLimit(query.limit);
+  const offset = normalizeOffset(query.offset);
+
   const products = await ProductModel.find(filter)
     .sort(getMongoSort(query.sort))
-    .limit(query.limit ?? DEFAULT_LIMIT)
+    .skip(offset)
+    .limit(limit)
     .lean();
 
   return products.map((product) =>
     serializeProduct(product as Partial<Product> & Record<string, unknown>)
   );
+}
+
+export async function getProductsCount(query: ProductQuery = {}) {
+  if (!isDatabaseConfigured()) {
+    return applyMemoryFilters(seedProducts, query).length;
+  }
+
+  await ensureProductsSeeded();
+  const filter = buildMongoFilter(query);
+  return ProductModel.countDocuments(filter);
 }
 
 export async function getProductById(idOrSlug: string) {

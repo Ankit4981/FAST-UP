@@ -42,6 +42,7 @@ export type ProductQuery = {
   sort?: "price-asc" | "price-desc" | "rating-desc" | "newest";
   search?: string;
   limit?: number;
+  offset?: number;
 };
 
 export type CartItem = Product & {

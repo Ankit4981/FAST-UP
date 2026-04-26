@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 
 import { useCartStore } from "@/store/cartStore";
@@ -19,26 +19,31 @@ const navItems = [
   {
     label: "Sports",
     href: "/products?category=Sports+Nutrition",
+    category: "Sports Nutrition",
     children: ["Hydration", "Recovery", "BCAA", "Endurance"]
   },
   {
     label: "Daily",
     href: "/products?category=Daily+Nutrition",
+    category: "Daily Nutrition",
     children: ["Multivitamin", "Immunity", "Wellness"]
   },
   {
     label: "Women",
     href: "/products?category=Women%27s+Nutrition",
+    category: "Women's Nutrition",
     children: ["Beauty", "Collagen", "Daily Care"]
   },
   {
     label: "Protein",
     href: "/products?category=Plant+Power",
+    category: "Plant Power",
     children: ["Protein", "Vegan", "Muscle"]
   },
   {
     label: "Bundles",
     href: "/products?category=Bundles",
+    category: "Bundles",
     children: ["Race Day", "Value Packs", "Starter Kits"]
   }
 ];
@@ -46,10 +51,12 @@ const navItems = [
 export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const [query, setQuery] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const items = useCartStore((state) => state.items);
+  const activeCategory = searchParams.get("category");
 
   const cartCount = useMemo(
     () => items.reduce((total, item) => total + item.quantity, 0),
@@ -175,8 +182,8 @@ export function Navbar() {
                 <Link
                   href={item.href}
                   className={`flex h-12 items-center gap-1 px-3 text-sm font-bold transition ${
-                    pathname === "/products"
-                      ? "text-brand-black hover:text-brand-orange"
+                    pathname === "/products" && activeCategory === item.category
+                      ? "text-brand-orange"
                       : "text-neutral-700 hover:text-brand-orange"
                   }`}
                 >

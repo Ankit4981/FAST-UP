@@ -4,6 +4,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { verifyUserCredentials } from "@/lib/users";
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
+
   providers: [
     CredentialsProvider({
       name: "Email and password",

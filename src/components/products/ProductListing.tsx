@@ -16,6 +16,10 @@ type ApiResponse = {
   products: Product[];
   facets: Facets;
   count: number;
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 };
 
 const priceRanges = [
@@ -25,6 +29,15 @@ const priceRanges = [
   { label: "INR 1000+", min: "1000", max: "" }
 ];
 
+function toPositiveInteger(value: string | null, fallback: number) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+
+  return Math.floor(parsed);
+}
+
 export function ProductListing({ initialFacets }: { initialFacets: Facets }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -32,12 +45,17 @@ export function ProductListing({ initialFacets }: { initialFacets: Facets }) {
   const [data, setData] = useState<ApiResponse>({
     products: [],
     facets: initialFacets,
-    count: 0
+    count: 0,
+    total: 0,
+    page: 1,
+    pageSize: 12,
+    totalPages: 1
   });
   const [isLoading, setIsLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [searchDraft, setSearchDraft] = useState(searchParams.get("search") ?? "");
 
+  const currentPageSize = Math.min(48, toPositiveInteger(searchParams.get("pageSize"), 12));
   const selectedTags = useMemo(() => searchParams.getAll("tags"), [searchParams]);
   const selectedCategory = searchParams.get("category") ?? "";
   const queryString = searchParams.toString();
@@ -59,39 +77,58 @@ export function ProductListing({ initialFacets }: { initialFacets: Facets }) {
     return () => controller.abort();
   }, [queryString]);
 
-  function updateParam(key: string, value?: string) {
+  function pushParams(
+    mutate: (params: URLSearchParams) => void,
+    options?: { keepPage?: boolean }
+  ) {
     const params = new URLSearchParams(searchParams.toString());
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
+
+    mutate(params);
+
+    if (!options?.keepPage) {
+      params.delete("page");
     }
-    router.push(`${pathname}?${params.toString()}`);
+
+    const nextQuery = params.toString();
+    router.push(nextQuery ? `${pathname}?${nextQuery}` : pathname);
+    setMobileFiltersOpen(false);
+  }
+
+  function updateParam(key: string, value?: string) {
+    pushParams((params) => {
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+    });
   }
 
   function toggleTag(tag: string) {
-    const params = new URLSearchParams(searchParams.toString());
-    const current = params.getAll("tags");
-    params.delete("tags");
-    const next = current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag];
-    next.forEach((item) => params.append("tags", item));
-    router.push(`${pathname}?${params.toString()}`);
+    pushParams((params) => {
+      const current = params.getAll("tags");
+      params.delete("tags");
+      const next = current.includes(tag)
+        ? current.filter((item) => item !== tag)
+        : [...current, tag];
+      next.forEach((item) => params.append("tags", item));
+    });
   }
 
   function applyPriceRange(value: string) {
     const range = priceRanges[Number(value)] ?? priceRanges[0];
-    const params = new URLSearchParams(searchParams.toString());
-    if (range.min) {
-      params.set("minPrice", range.min);
-    } else {
-      params.delete("minPrice");
-    }
-    if (range.max) {
-      params.set("maxPrice", range.max);
-    } else {
-      params.delete("maxPrice");
-    }
-    router.push(`${pathname}?${params.toString()}`);
+    pushParams((params) => {
+      if (range.min) {
+        params.set("minPrice", range.min);
+      } else {
+        params.delete("minPrice");
+      }
+      if (range.max) {
+        params.set("maxPrice", range.max);
+      } else {
+        params.delete("maxPrice");
+      }
+    });
   }
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
@@ -100,7 +137,23 @@ export function ProductListing({ initialFacets }: { initialFacets: Facets }) {
   }
 
   function clearFilters() {
+    setMobileFiltersOpen(false);
     router.push(pathname);
+  }
+
+  function goToPage(page: number) {
+    const safePage = Math.max(1, Math.min(page, data.totalPages));
+    pushParams(
+      (params) => {
+        if (safePage <= 1) {
+          params.delete("page");
+        } else {
+          params.set("page", String(safePage));
+        }
+        params.set("pageSize", String(currentPageSize));
+      },
+      { keepPage: true }
+    );
   }
 
   const activePriceIndex = priceRanges.findIndex(
@@ -233,7 +286,13 @@ export function ProductListing({ initialFacets }: { initialFacets: Facets }) {
 
           <div>
             <div className="mb-4 flex items-center justify-between text-sm font-semibold text-neutral-500">
-              <span>{isLoading ? "Loading products..." : `${data.count} products found`}</span>
+              <span>
+                {isLoading
+                  ? "Loading products..."
+                  : data.total > 0
+                    ? `${Math.max(1, (data.page - 1) * data.pageSize + 1)}-${(data.page - 1) * data.pageSize + data.count} of ${data.total} products`
+                    : "0 products found"}
+              </span>
             </div>
             {data.products.length > 0 ? (
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -252,6 +311,30 @@ export function ProductListing({ initialFacets }: { initialFacets: Facets }) {
                 </button>
               </div>
             )}
+
+            {data.totalPages > 1 ? (
+              <div className="mt-8 flex items-center justify-between gap-3 rounded-lg border border-neutral-200 bg-white p-4">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => goToPage(data.page - 1)}
+                  disabled={data.page <= 1 || isLoading}
+                >
+                  Previous
+                </button>
+                <p className="text-sm font-bold text-neutral-600">
+                  Page {data.page} of {data.totalPages}
+                </p>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => goToPage(data.page + 1)}
+                  disabled={data.page >= data.totalPages || isLoading}
+                >
+                  Next
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

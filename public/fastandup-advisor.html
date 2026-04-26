@@ -8,9 +8,9 @@
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23ff5500'/><text x='16' y='22' font-size='14' text-anchor='middle' fill='white' font-family='serif' font-weight='bold'>F</text></svg>">
   <style>
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
    DESIGN TOKENS
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+═══════════════════════════════════════════ */
     :root {
       --void: #03040a;
       --ink0: #07090f;
@@ -35,9 +35,9 @@
       --r3: 28px;
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
    RESET & BASE
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+═══════════════════════════════════════════ */
     * {
       margin: 0;
       padding: 0;
@@ -59,9 +59,9 @@
       position: relative
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   PLEXUS CANVAS â€” FULL SCREEN FIXED
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    /* ═══════════════════════════════════════════
+   PLEXUS CANVAS — FULL SCREEN FIXED
+═══════════════════════════════════════════ */
     #plexus-canvas {
       position: fixed;
       top: 0;
@@ -73,9 +73,9 @@
       display: block;
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
    DECORATIVE BACKGROUND LAYERS
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+═══════════════════════════════════════════ */
     .grid-overlay {
       position: fixed;
       inset: 0;
@@ -161,9 +161,9 @@
       }
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
    CUSTOM CURSOR
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+═══════════════════════════════════════════ */
     #cur-dot {
       position: fixed;
       width: 10px;
@@ -203,9 +203,9 @@
       border-color: rgba(0, 212, 255, .5)
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
    LOADER
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+═══════════════════════════════════════════ */
     #loader {
       position: fixed;
       inset: 0;
@@ -357,9 +357,9 @@
       pointer-events: none
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
    SCREENS
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+═══════════════════════════════════════════ */
     .screen {
       position: relative;
       z-index: 2;
@@ -372,9 +372,9 @@
       flex-direction: column
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   â”€â”€ SCREEN 1: INTRO â”€â”€
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    /* ═══════════════════════════════════════════
+   ── SCREEN 1: INTRO ──
+═══════════════════════════════════════════ */
     #screen-intro {
       align-items: center;
       justify-content: flex-start;
@@ -1235,9 +1235,9 @@
       background: rgba(255, 255, 255, .06)
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   â”€â”€ SCREEN 2: CHAT â”€â”€
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    /* ═══════════════════════════════════════════
+   ── SCREEN 2: CHAT ──
+═══════════════════════════════════════════ */
     #screen-chat {
       align-items: center;
       justify-content: flex-start;
@@ -2445,7 +2445,7 @@
       color: var(--or)
     }
 
-    /* â”€â”€â”€ Product Image â”€â”€â”€ */
+    /* ─── Product Image ─── */
     .prod-image-wrap {
       display: flex;
       justify-content: center;
@@ -2475,7 +2475,7 @@
       transform: scale(1.05)
     }
 
-    /* â”€â”€â”€ Product Description â”€â”€â”€ */
+    /* ─── Product Description ─── */
     .prod-desc {
       font-size: 13px;
       color: var(--tx2);
@@ -2483,7 +2483,7 @@
       line-height: 1.6;
     }
 
-    /* â”€â”€â”€ Why List â”€â”€â”€ */
+    /* ─── Why List ─── */
     .why-list {
       padding-left: 41px;
       display: flex;
@@ -2575,7 +2575,7 @@
     <div class="lpct-wrap"><span id="lpct">0</span>%</div>
   </div>
 
-  <!-- PLEXUS â€” always rendered, always fixed full-screen -->
+  <!-- PLEXUS — always rendered, always fixed full-screen -->
   <canvas id="plexus-canvas"></canvas>
 
   <!-- DECORATIVE -->
@@ -2584,7 +2584,7 @@
   <div class="orb2"></div>
   <div class="scan-line"></div>
 
-  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SCREEN 1: INTRO â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  <!-- ═══════════════ SCREEN 1: INTRO ═══════════════ -->
   <div id="screen-intro" class="screen">
     <nav class="nav">
       <div class="nav-brand">
@@ -2634,18 +2634,18 @@
         <div class="reveal d5">
           <button class="cta-btn" id="cta-main" onclick="goToChat()">
             START AI RECOMMENDATION
-            <div class="cta-icon">â†’</div>
+            <div class="cta-icon">→</div>
           </button>
           <div class="cta-sub">Takes less than 60 seconds &nbsp;Â·&nbsp; Free &nbsp;Â·&nbsp; No signup</div>
         </div>
         <div class="trust reveal d6">
-          <div class="tbadge"><span class="tbadge-icon">âœ…</span><span class="tbadge-txt"><strong>10,000+</strong>
+          <div class="tbadge"><span class="tbadge-icon">✅</span><span class="tbadge-txt"><strong>10,000+</strong>
               users</span></div>
-          <div class="tbadge"><span class="tbadge-icon">ðŸŽ¯</span><span class="tbadge-txt"><strong>91%</strong>
+          <div class="tbadge"><span class="tbadge-icon">🎯</span><span class="tbadge-txt"><strong>91%</strong>
               accuracy</span></div>
-          <div class="tbadge"><span class="tbadge-icon">ðŸ›¡ï¸</span><span class="tbadge-txt"><strong>WADA</strong>
+          <div class="tbadge"><span class="tbadge-icon">🛡️</span><span class="tbadge-txt"><strong>WADA</strong>
               compliant</span></div>
-          <div class="tbadge"><span class="tbadge-icon">ðŸ‡¨ðŸ‡­</span><span class="tbadge-txt"><strong>Swiss</strong>
+          <div class="tbadge"><span class="tbadge-icon">🇨🇭</span><span class="tbadge-txt"><strong>Swiss</strong>
               tech</span></div>
         </div>
       </div>
@@ -2666,7 +2666,7 @@
                 alt="NightOut Instant Cocktail Mix">
             </div>
             <div class="cb">
-              <div class="cb-eyebrow">âš¡ Recommended for You</div>
+              <div class="cb-eyebrow">⚡ Recommended for You</div>
               <div class="cb-name">Fast&<em>Up NightOut</em></div>
               <div class="cb-cat">Instant Cocktail Mix | Electrolyte Hydration | Zero Sugar</div>
               <div class="cb-metrics">
@@ -2704,19 +2704,19 @@
     </div>
 
     <div class="cert-bar">
-      <div class="cert-item"><span class="cert-icon">âš¡</span>Make India Active</div>
+      <div class="cert-item"><span class="cert-icon">⚡</span>Make India Active</div>
       <div class="cert-sep"></div>
-      <div class="cert-item"><span class="cert-icon">ðŸ…</span>Informed Choiceâ„¢</div>
+      <div class="cert-item"><span class="cert-icon">🏅</span>Informed Choice™</div>
       <div class="cert-sep"></div>
-      <div class="cert-item"><span class="cert-icon">ðŸ‡¨ðŸ‡­</span>Swiss Technology</div>
+      <div class="cert-item"><span class="cert-icon">🇨🇭</span>Swiss Technology</div>
       <div class="cert-sep"></div>
-      <div class="cert-item"><span class="cert-icon">âœ…</span>FSSAI Licensed</div>
+      <div class="cert-item"><span class="cert-icon">✅</span>FSSAI Licensed</div>
       <div class="cert-sep"></div>
-      <div class="cert-item"><span class="cert-icon">ðŸ›¡ï¸</span>WADA Compliant</div>
+      <div class="cert-item"><span class="cert-icon">🛡️</span>WADA Compliant</div>
     </div>
   </div><!-- /screen-intro -->
 
-  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SCREEN 2: CHAT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  <!-- ═══════════════ SCREEN 2: CHAT ═══════════════ -->
   <div id="screen-chat" class="screen">
     <div class="chat-shell">
 
@@ -2747,10 +2747,10 @@
         <div class="demo-line"></div>
       </div>
       <div class="demo-btns">
-        <button class="demo-btn" onclick="loadDemo('gym')">ðŸ‹ï¸ Gym-Goer</button>
-        <button class="demo-btn" onclick="loadDemo('runner')">ðŸƒ Runner</button>
-        <button class="demo-btn" onclick="loadDemo('pro')">ðŸ’¼ Professional</button>
-        <button class="demo-btn" onclick="loadDemo('nightout')">ðŸ¹ NightOut</button>
+        <button class="demo-btn" onclick="loadDemo('gym')">🏋️ Gym-Goer</button>
+        <button class="demo-btn" onclick="loadDemo('runner')">🏃 Runner</button>
+        <button class="demo-btn" onclick="loadDemo('pro')">💼 Professional</button>
+        <button class="demo-btn" onclick="loadDemo('nightout')">🍹 NightOut</button>
       </div>
 
       <div class="fu-hr"></div>
@@ -2760,15 +2760,15 @@
       <div id="chat-area"></div>
 
       <div class="fu-footer">
-        ALL PRODUCTS FROM <span>FASTANDUP.IN</span> Â· WADA COMPLIANT Â· FSSAI LICENSED Â· <span>MAKE INDIA ACTIVE âš¡</span>
+        ALL PRODUCTS FROM <span>FASTANDUP.IN</span> Â· WADA COMPLIANT Â· FSSAI LICENSED Â· <span>MAKE INDIA ACTIVE ⚡</span>
       </div>
     </div>
   </div><!-- /screen-chat -->
 
   <script>
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       PLEXUS CANVAS â€” runs on both screens
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    /* ═══════════════════════════════════════════
+       PLEXUS CANVAS — runs on both screens
+    ═══════════════════════════════════════════ */
     (function () {
       var cv = document.getElementById('plexus-canvas');
       var ctx = cv.getContext('2d');
@@ -2864,9 +2864,9 @@
       frame();
     })();
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
        CUSTOM CURSOR
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    ═══════════════════════════════════════════ */
     (function () {
       var dot = document.getElementById('cur-dot');
       var ring = document.getElementById('cur-ring');
@@ -2892,9 +2892,9 @@
       });
     })();
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
        LOADER COUNTER
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    ═══════════════════════════════════════════ */
     (function () {
       var el = document.getElementById('lpct'), count = 0;
       var t = setInterval(function () {
@@ -2907,9 +2907,9 @@
       }, 3600);
     })();
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
        SCREEN MANAGEMENT
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    ═══════════════════════════════════════════ */
     function showScreen(id) {
       document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active'); });
       document.getElementById('screen-' + id).classList.add('active');
@@ -2932,9 +2932,9 @@
       }, 400);
     }, 2900);
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
        3D CARD TILT (HERO)
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    ═══════════════════════════════════════════ */
     (function () {
       var wrap = document.getElementById('card3d');
       var card = document.getElementById('heroCard');
@@ -2960,18 +2960,18 @@
       }, 2000);
     })();
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
        PRODUCTS DATA
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    ═══════════════════════════════════════════ */
     var PRODUCTS = {
       activate: {
         name: "Fast&Up <em>Activate</em>",
         category: "Caffeine-Free Pre-Workout Â· Effervescent Tablet",
         image: "https://in.fastandup.com/cdn/shop/files/Activate_Orange_1_Tablet_shot.png?v=1710832891",
-        desc: "A caffeine-free pre-workout that floods muscles with nitric oxide for peak performance â€” without the crash.",
+        desc: "A caffeine-free pre-workout that floods muscles with nitric oxide for peak performance — without the crash.",
         why_list: ["Matches your hydration and lifestyle goal", "Zero sugar and zero calories - guilt-free", "Added electrolytes for instant hydration"],
         tags: ["Caffeine-Free", "1500mg L-Arginine", "250mg L-Carnitine", "WADA Compliant"],
-        why: "Each tablet delivers 1500 mg L-Arginine that raises nitric oxide levels, widening blood vessels for more oxygen to muscles, plus 250 mg L-Carnitine to convert stored fat into energy. Lycopene and Zinc fight Exercise-Induced Oxidative Stress (EXIOS). Caffeine-free â€” perfect for evening training. Swiss Effervescent Technology means it works in 30 seconds, not 30 minutes.",
+        why: "Each tablet delivers 1500 mg L-Arginine that raises nitric oxide levels, widening blood vessels for more oxygen to muscles, plus 250 mg L-Carnitine to convert stored fat into energy. Lycopene and Zinc fight Exercise-Induced Oxidative Stress (EXIOS). Caffeine-free — perfect for evening training. Swiss Effervescent Technology means it works in 30 seconds, not 30 minutes.",
         when: "Drop 1 tablet in 250 ml water, wait for it to dissolve fully, and drink 30 minutes before your workout or training session.",
         badges: ["Swiss Technology", "FSSAI Lic. 10020022011847", "100% Vegetarian"],
         url: "https://in.fastandup.com/products/activate-combo-of-3-tubes-orange"
@@ -2980,23 +2980,23 @@
         name: "Fast&Up <em>Reload</em>",
         category: "Hypotonic Hydration Â· Effervescent Tablet",
         image: "https://in.fastandup.com/cdn/shop/files/Reload_Watermelon_Single_shot.png?v=1710832891",
-        desc: "India's first Informed Choiceâ€“certified hydration drink â€” replenishes 5 electrolytes faster than water alone.",
+        desc: "India's first Informed Choice–certified hydration drink — replenishes 5 electrolytes faster than water alone.",
         why_list: ["Matches your hydration and lifestyle goal", "Zero sugar and zero calories - guilt-free", "Added electrolytes for instant hydration"],
-        tags: ["5 Electrolytes", "Vitamin C + B12", "Informed Choiceâ„¢", "Low Sugar"],
-        why: "India's first Informed Choiceâ€“certified effervescent hypotonic hydration drink. Contains 5 essential electrolytes â€” Sodium, Potassium, Magnesium, Calcium & Chloride â€” plus Vitamin C and B12 to reduce fatigue. Hypotonic formula absorbs faster than water alone.",
+        tags: ["5 Electrolytes", "Vitamin C + B12", "Informed Choice™", "Low Sugar"],
+        why: "India's first Informed Choice–certified effervescent hypotonic hydration drink. Contains 5 essential electrolytes — Sodium, Potassium, Magnesium, Calcium & Chloride — plus Vitamin C and B12 to reduce fatigue. Hypotonic formula absorbs faster than water alone.",
         when: "Drop 1 tablet in 250 ml water. Consume during any workout, outdoor activity, or whenever you sweat. Safe to use daily.",
-        badges: ["Informed Choiceâ„¢ Certified", "Swiss Technology", "FSSAI Licensed"],
+        badges: ["Informed Choice™ Certified", "Swiss Technology", "FSSAI Licensed"],
         url: "https://in.fastandup.com/products/reload-hydration-supplements"
       },
       reload_iso: {
         name: "Fast&Up <em>Reload Isotonic</em>",
         category: "Isotonic Sports Drink Â· 4-in-1 Intra-Workout",
         image: "https://in.fastandup.com/cdn/shop/files/Reload_Isotonic_Orange_Single_shot.png?v=1710832891",
-        desc: "A 4-in-1 intra-workout powerhouse â€” carbs, electrolytes, BCAA & vitamins in every sip.",
+        desc: "A 4-in-1 intra-workout powerhouse — carbs, electrolytes, BCAA & vitamins in every sip.",
         why_list: ["Matches your hydration and lifestyle goal", "Zero sugar and zero calories - guilt-free", "Added electrolytes for instant hydration"],
         tags: ["BCAA 2:1:1", "5 Electrolytes", "Fast Carbs", "Vitamin Booster"],
         why: "A 4-in-1 intra-workout formula: fast carbohydrates (Maltodextrin + Fructose 2:1 ratio) for sustained energy, 5 electrolytes for full hydration, BCAA 2:1:1 with Glutamine to protect muscle during long sessions, and 6 vitamins to maintain performance output.",
-        when: "Mix 1 scoop in 400â€“500 ml water and sip throughout your training session. Ideal for runners, cyclists, cricketers, and anyone training over an hour.",
+        when: "Mix 1 scoop in 400–500 ml water and sip throughout your training session. Ideal for runners, cyclists, cricketers, and anyone training over an hour.",
         badges: ["Swiss Technology", "FSSAI Licensed", "Banned Substance Free"],
         url: "https://www.fastandup.in/product/reload-isotonic-sports-drink-orange"
       },
@@ -3004,10 +3004,10 @@
         name: "Fast&Up <em>Recover</em>",
         category: "Post-Workout Recovery Â· Effervescent Tablet",
         image: "https://in.fastandup.com/cdn/shop/files/Recover_Raspberry_Single_shot.png?v=1710832891",
-        desc: "All 20 amino acids in one effervescent tablet â€” your muscles' best friend after every session.",
+        desc: "All 20 amino acids in one effervescent tablet — your muscles' best friend after every session.",
         why_list: ["Matches your hydration and lifestyle goal", "Zero sugar and zero calories - guilt-free", "Added electrolytes for instant hydration"],
         tags: ["All 20 Amino Acids", "EAA + Glutathione", "Raspberry Flavour", "Veg"],
-        why: "India's first effervescent vegetarian amino acid supplement. The Essential Recovery Complex (ERC) delivers all 20 amino acids â€” including all 9 Essential Amino Acids â€” in free-form for instant absorption. Glutathione acts as a powerful antioxidant to reduce muscle damage and soreness.",
+        why: "India's first effervescent vegetarian amino acid supplement. The Essential Recovery Complex (ERC) delivers all 20 amino acids — including all 9 Essential Amino Acids — in free-form for instant absorption. Glutathione acts as a powerful antioxidant to reduce muscle damage and soreness.",
         when: "Drop 1 tablet in 250 ml water and drink within 30 minutes of finishing your workout for maximum muscle protein synthesis.",
         badges: ["Swiss Technology", "WADA Compliant", "FSSAI Lic. 10020022011847"],
         url: "https://in.fastandup.com/products/recover-post-workout-single-tube"
@@ -3016,35 +3016,35 @@
         name: "Fast&Up <em>Whey Isolate</em>",
         category: "Whey Protein Â· 90% Pure Isolate",
         image: "https://in.fastandup.com/cdn/shop/files/Whey_Isolate_Chocolate_single_shot.png?v=1710832891",
-        desc: "90% pure grass-fed European whey â€” ultra-low carbs, no bloating, maximum muscle protein synthesis.",
+        desc: "90% pure grass-fed European whey — ultra-low carbs, no bloating, maximum muscle protein synthesis.",
         why_list: ["Matches your hydration and lifestyle goal", "Zero sugar and zero calories - guilt-free", "Added electrolytes for instant hydration"],
-        tags: ["26g Protein/Serve", "6g BCAA", "4.5g Glutamine", "Pepzyme AGâ„¢"],
-        why: "Ultra-filtered, grass-fed European whey isolate providing 26 g of 90% pure protein, 6 g naturally occurring BCAA, and 4.5 g Glutamine per 31 g serving. Ultra-low carbs (0.4 g) and no added sugar. Added Pepzyme AGâ„¢ digestive enzyme prevents bloating.",
-        when: "Mix 1 scoop in 200â€“300 ml cold water or milk within 30 min post-workout, or anytime to meet daily protein targets.",
-        badges: ["European Grass-Fed Whey", "Pepzyme AGâ„¢", "FSSAI Licensed"],
+        tags: ["26g Protein/Serve", "6g BCAA", "4.5g Glutamine", "Pepzyme AG™"],
+        why: "Ultra-filtered, grass-fed European whey isolate providing 26 g of 90% pure protein, 6 g naturally occurring BCAA, and 4.5 g Glutamine per 31 g serving. Ultra-low carbs (0.4 g) and no added sugar. Added Pepzyme AG™ digestive enzyme prevents bloating.",
+        when: "Mix 1 scoop in 200–300 ml cold water or milk within 30 min post-workout, or anytime to meet daily protein targets.",
+        badges: ["European Grass-Fed Whey", "Pepzyme AG™", "FSSAI Licensed"],
         url: "https://in.fastandup.com/products/whey-protein-isolate"
       },
       plant_protein: {
         name: "Fast&Up <em>Plant Protein</em>",
         category: "Vegan Plant Protein Â· Pea + Brown Rice Isolate",
         image: "https://in.fastandup.com/cdn/shop/files/Plant_Protein_Chocolate_single_shot.png?v=1710832891",
-        desc: "26g of USA-sourced pea + rice protein â€” 100% vegan, batch-tested, and gut-friendly.",
+        desc: "26g of USA-sourced pea + rice protein — 100% vegan, batch-tested, and gut-friendly.",
         why_list: ["Matches your hydration and lifestyle goal", "Zero sugar and zero calories - guilt-free", "Added electrolytes for instant hydration"],
         tags: ["26g Protein/Serve", "4.6g BCAA", "4.8g Glutamine", "USA Sourced"],
-        why: "26 g of premium Pea Isolate + Brown Rice Protein sourced from the USA per serving, with naturally occurring 4.6 g BCAA and 4.8 g Glutamine. Added Pepzyme Pro (digestive enzymes + probiotics) prevents bloating. Informed Choiceâ€“certified, batch-tested in the UK.",
-        when: "Mix 1 scoop in 250â€“300 ml water or plant-based milk. Consume within 45â€“60 min post-workout, or at any time to meet daily protein goals.",
-        badges: ["Informed Choiceâ„¢ Certified", "100% Vegan", "FSSAI Licensed"],
+        why: "26 g of premium Pea Isolate + Brown Rice Protein sourced from the USA per serving, with naturally occurring 4.6 g BCAA and 4.8 g Glutamine. Added Pepzyme Pro (digestive enzymes + probiotics) prevents bloating. Informed Choice–certified, batch-tested in the UK.",
+        when: "Mix 1 scoop in 250–300 ml water or plant-based milk. Consume within 45–60 min post-workout, or at any time to meet daily protein goals.",
+        badges: ["Informed Choice™ Certified", "100% Vegan", "FSSAI Licensed"],
         url: "https://in.fastandup.com/products/plant-protein-powder-500gms"
       },
       bcaa: {
         name: "Fast&Up <em>EAA + BCAA</em>",
         category: "Essential Amino Acids Â· Intra-Workout",
         image: "https://in.fastandup.com/cdn/shop/files/EAA_Watermelon_single_shot.png?v=1710832891",
-        desc: "9 essential amino acids + BCAAs 2:1:1 â€” fuel muscle synthesis and block catabolism mid-session.",
+        desc: "9 essential amino acids + BCAAs 2:1:1 — fuel muscle synthesis and block catabolism mid-session.",
         why_list: ["Matches your hydration and lifestyle goal", "Zero sugar and zero calories - guilt-free", "Added electrolytes for instant hydration"],
         tags: ["9 EAA", "BCAA 2:1:1", "Electrolytes", "Caffeine-Free"],
-        why: "Fast&Up EAA provides 9 Essential Amino Acids â€” including BCAAs in 2:1:1 ratio â€” plus Taurine and Citrulline for muscle re-energising. Prevents muscle catabolism, stimulates protein synthesis and reduces DOMS without any stimulants.",
-        when: "Mix in 300â€“400 ml water and sip throughout your workout. Especially beneficial during high-volume training or sessions over 45 min.",
+        why: "Fast&Up EAA provides 9 Essential Amino Acids — including BCAAs in 2:1:1 ratio — plus Taurine and Citrulline for muscle re-energising. Prevents muscle catabolism, stimulates protein synthesis and reduces DOMS without any stimulants.",
+        when: "Mix in 300–400 ml water and sip throughout your workout. Especially beneficial during high-volume training or sessions over 45 min.",
         badges: ["Ultra Granulation Tech", "Caffeine-Free", "FSSAI Licensed"],
         url: "https://in.fastandup.com/products/essential-amino-acids"
       },
@@ -3052,11 +3052,11 @@
         name: "Fast&Up <em>Vitalize</em>",
         category: "Daily Multivitamin Â· 21 Vitamins & Minerals",
         image: "https://in.fastandup.com/cdn/shop/files/Vitalize_Orange_Single_shot.png?v=1710832891",
-        desc: "India's first effervescent multivitamin with Beetroot Extract â€” 3Ã— faster absorption than regular tablets.",
+        desc: "India's first effervescent multivitamin with Beetroot Extract — 3Ã— faster absorption than regular tablets.",
         why_list: ["Matches your hydration and lifestyle goal", "Zero sugar and zero calories - guilt-free", "Added electrolytes for instant hydration"],
         tags: ["12 Vitamins", "9 Minerals", "Beetroot Extract", "Swiss Technology"],
-        why: "India's first effervescent multivitamin â€” 12 vitamins, 9 minerals, and a proprietary nitrate-rich Beetroot Extract for blood circulation and stamina. Swiss Effervescent Technology provides 3Ã— faster absorption versus conventional tablets.",
-        when: "Drop 1 tablet in 250 ml water every morning after breakfast. Take daily for consistent results â€” benefits typically noticed within 30 days.",
+        why: "India's first effervescent multivitamin — 12 vitamins, 9 minerals, and a proprietary nitrate-rich Beetroot Extract for blood circulation and stamina. Swiss Effervescent Technology provides 3Ã— faster absorption versus conventional tablets.",
+        when: "Drop 1 tablet in 250 ml water every morning after breakfast. Take daily for consistent results — benefits typically noticed within 30 days.",
         badges: ["Swiss Technology", "FSSAI Lic. 10020022011847", "100% Vegetarian"],
         url: "https://in.fastandup.com/products/vitalize-multivitamin-single-tube"
       },
@@ -3064,10 +3064,10 @@
         name: "Fast&Up <em>Charge</em>",
         category: "Natural Vitamin C + Zinc Â· Daily Immunity",
         image: "https://in.fastandup.com/cdn/shop/files/Charge_Orange_Single_shot.png?v=1710832891",
-        desc: "Natural Amla-derived Vitamin C + Zinc â€” gentler, more bioavailable, and immune-boosting every morning.",
+        desc: "Natural Amla-derived Vitamin C + Zinc — gentler, more bioavailable, and immune-boosting every morning.",
         why_list: ["Matches your hydration and lifestyle goal", "Zero sugar and zero calories - guilt-free", "Added electrolytes for instant hydration"],
         tags: ["1000mg Amla Extract", "50mg Vitamin C", "10mg Zinc", "Effervescent"],
-        why: "Each tablet provides 1000 mg of natural Amla extract delivering 50 mg of natural Vitamin C â€” gentler and more bioavailable than synthetic ascorbic acid â€” plus 10 mg Zinc for immune modulation and collagen production.",
+        why: "Each tablet provides 1000 mg of natural Amla extract delivering 50 mg of natural Vitamin C — gentler and more bioavailable than synthetic ascorbic acid — plus 10 mg Zinc for immune modulation and collagen production.",
         when: "Drop 1 tablet in 250 ml water every morning. Safe for daily long-term use.",
         badges: ["Natural Amla Extract", "Swiss Technology", "FSSAI Licensed"],
         url: "https://in.fastandup.com/products/charge-vitaminc-combo-of-3tubes"
@@ -3076,7 +3076,7 @@
         name: "Fast&Up <em>L-Carnitine 2000mg</em>",
         category: "Weight Management Â· Fat Metabolism Â· Effervescent",
         image: "https://in.fastandup.com/cdn/shop/files/L_Carnitine_Lemon_single_shot.png?v=1710832891",
-        desc: "CarnipureÂ® L-Carnitine from Lonza Switzerland â€” turns stored fat into workout fuel, zero stimulants.",
+        desc: "CarnipureÂ® L-Carnitine from Lonza Switzerland — turns stored fat into workout fuel, zero stimulants.",
         why_list: ["Matches your hydration and lifestyle goal", "Zero sugar and zero calories - guilt-free", "Added electrolytes for instant hydration"],
         tags: ["CarnipureÂ® Lonza", "2000mg/Serving", "Fat to Energy", "No Stimulants"],
         why: "Each effervescent tablet delivers 2000 mg of CarnipureÂ® L-Carnitine Tartrate from Lonza Switzerland. Acts as a natural fat transporter, carrying stored fatty acids into the mitochondria where they are oxidised as fuel. Zero stimulants.",
@@ -3092,16 +3092,16 @@
         desc: "Zero-sugar, zero-calorie instant cocktail mix with added electrolytes for hydration. Perfect for social nights - no guilt, all fun.",
         why_list: ["Matches your hydration and lifestyle goal", "Zero sugar and zero calories - guilt-free", "Added electrolytes for instant hydration"],
         tags: ["Zero Sugar", "Zero Calories", "15 Easy Mix Sticks", "Electrolytes"],
-        why: "NightOut Instant Cocktail Mix gives you a refreshing cocktail-style experience without any sugar, artificial colours, or calories. Each easy-mix stick comes loaded with electrolytes so you stay hydrated through the night. Non-fizzy and perfectly balanced â€” just dip, tip, and sip.",
+        why: "NightOut Instant Cocktail Mix gives you a refreshing cocktail-style experience without any sugar, artificial colours, or calories. Each easy-mix stick comes loaded with electrolytes so you stay hydrated through the night. Non-fizzy and perfectly balanced — just dip, tip, and sip.",
         when: "Dip one stick into 250-300 ml of water, stir well, and enjoy anytime you want a refreshing, hydrating cocktail experience.",
         badges: ["Zero Sugar", "Zero Calories", "Swiss Quality"],
         url: "https://in.fastandup.com/"
       }
     };
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
        SCORING ENGINE
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    ═══════════════════════════════════════════ */
     function kw(text, words) {
       var t = (text || '').toLowerCase();
       return words.some(function (w) { return t.includes(w); });
@@ -3171,40 +3171,40 @@
       return Math.min(98, Math.round(72 + ((top - sec) / top) * 26));
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
        QUESTIONS
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    ═══════════════════════════════════════════ */
     var QUESTIONS = [
       {
-        id: "goal", eye: "STEP 01 â€” MISSION", txt: "What's your primary fitness goal?", hint: "Pick the one that drives you most right now",
-        opts: ["Build muscle & strength ðŸ’ª", "Improve endurance & stamina ðŸƒ", "Boost energy & immunity âš¡", "Lose weight / lean out ðŸ”¥", "Faster workout recovery ðŸ”„", "General health & wellness ðŸŒ¿"]
+        id: "goal", eye: "STEP 01 — MISSION", txt: "What's your primary fitness goal?", hint: "Pick the one that drives you most right now",
+        opts: ["Build muscle & strength 💪", "Improve endurance & stamina 🏃", "Boost energy & immunity ⚡", "Lose weight / lean out 🔥", "Faster workout recovery 🔄", "General health & wellness 🌿"]
       },
       {
-        id: "activity", eye: "STEP 02 â€” TRAINING", txt: "How do you typically train?", hint: "Choose what best describes your regular activity",
-        opts: ["Gym / Weight training ðŸ‹ï¸", "Running / Marathons ðŸƒ", "Cycling / Triathlon ðŸš´", "Cricket / Team sports âš½", "Yoga / Light exercise ðŸ§˜", "Not very active currently ðŸª‘"]
+        id: "activity", eye: "STEP 02 — TRAINING", txt: "How do you typically train?", hint: "Choose what best describes your regular activity",
+        opts: ["Gym / Weight training 🏋️", "Running / Marathons 🏃", "Cycling / Triathlon 🚴", "Cricket / Team sports ⚽", "Yoga / Light exercise 🧘", "Not very active currently 🪑"]
       },
       {
-        id: "diet", eye: "STEP 03 â€” DIET", txt: "What best describes your diet?", hint: "This determines which ingredients are right for you",
-        opts: ["Vegetarian ðŸŒ±", "Vegan ðŸŒ¿", "Non-Vegetarian ðŸ—"]
+        id: "diet", eye: "STEP 03 — DIET", txt: "What best describes your diet?", hint: "This determines which ingredients are right for you",
+        opts: ["Vegetarian 🌱", "Vegan 🌿", "Non-Vegetarian 🍗"]
       },
       {
-        id: "timing", eye: "STEP 04 â€” TIMING", txt: "When do you most need support?", hint: "This pinpoints the right product type",
-        opts: ["Before training â€” energy & power", "During training â€” stamina & hydration", "After training â€” recovery & repair", "All day â€” daily nutrition & wellness"]
+        id: "timing", eye: "STEP 04 — TIMING", txt: "When do you most need support?", hint: "This pinpoints the right product type",
+        opts: ["Before training — energy & power", "During training — stamina & hydration", "After training — recovery & repair", "All day — daily nutrition & wellness"]
       }
     ];
 
     var STEP_LABELS = ["Goal", "Training", "Diet", "Timing"];
 
     var DEMOS = {
-      gym: { goal: "Build muscle & strength ðŸ’ª", activity: "Gym / Weight training ðŸ‹ï¸", diet: "Non-Vegetarian ðŸ—", timing: "After training â€” recovery & repair" },
-      runner: { goal: "Improve endurance & stamina ðŸƒ", activity: "Running / Marathons ðŸƒ", diet: "Vegetarian ðŸŒ±", timing: "During training â€” stamina & hydration" },
-      pro: { goal: "Boost energy & immunity âš¡", activity: "Not very active currently ðŸª‘", diet: "Vegetarian ðŸŒ±", timing: "All day â€” daily nutrition & wellness" },
-      nightout: { goal: "Stay hydrated & refreshed ðŸ¹", activity: "Not very active currently ðŸª‘", diet: "Vegetarian ðŸŒ±", timing: "All day â€” daily nutrition & wellness" }
+      gym: { goal: "Build muscle & strength 💪", activity: "Gym / Weight training 🏋️", diet: "Non-Vegetarian 🍗", timing: "After training — recovery & repair" },
+      runner: { goal: "Improve endurance & stamina 🏃", activity: "Running / Marathons 🏃", diet: "Vegetarian 🌱", timing: "During training — stamina & hydration" },
+      pro: { goal: "Boost energy & immunity ⚡", activity: "Not very active currently 🪑", diet: "Vegetarian 🌱", timing: "All day — daily nutrition & wellness" },
+      nightout: { goal: "Stay hydrated & refreshed 🍹", activity: "Not very active currently 🪑", diet: "Vegetarian 🌱", timing: "All day — daily nutrition & wellness" }
     };
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
        CHAT STATE
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    ═══════════════════════════════════════════ */
     var state = {
       step: 0, answers: {}, history: [], feedback: null
     };
@@ -3213,25 +3213,25 @@
       state = { step: 0, answers: {}, history: [], feedback: null };
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
        STEP TRACKER RENDER
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    ═══════════════════════════════════════════ */
     function renderStepRow() {
       var html = '';
       STEP_LABELS.forEach(function (lbl, i) {
         var cls = '', lblCls = '';
         if (i < state.step) { cls = 'done'; lblCls = 'done-lbl'; }
         else if (i === state.step) { cls = 'act'; lblCls = 'act-lbl'; }
-        var sym = (i < state.step) ? 'âœ“' : (i + 1);
+        var sym = (i < state.step) ? '✓' : (i + 1);
         html += '<div class="snode"><div class="scirc ' + cls + '">' + sym + '</div><div class="slbl ' + lblCls + '">' + lbl + '</div></div>';
         if (i < 3) html += '<div class="sconn' + (i < state.step ? ' filled' : '') + '"></div>';
       });
       document.getElementById('step-row').innerHTML = html;
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
        CHAT AREA RENDER
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    ═══════════════════════════════════════════ */
     function renderChat() {
       var area = document.getElementById('chat-area');
       var html = '';
@@ -3239,7 +3239,7 @@
       // Greeting on first load
       if (state.step === 0 && state.history.length === 0) {
         html += '<div class="greet">'
-          + '<div class="greet-av">âš¡</div>'
+          + '<div class="greet-av">⚡</div>'
           + '<div><div class="greet-name">Fast&amp;Up AI Advisor</div>'
           + '<div class="greet-txt">Answer <strong>4 quick questions</strong> and I\'ll match you to the exact Fast&amp;Up product for your body, goals and lifestyle.</div>'
           + '<div class="greet-chips">'
@@ -3287,9 +3287,9 @@
 
         var top3 = getTop3(state.answers);
         var rankMeta = [
-          { medal: 'ðŸŽ¯', label: 'Matched For You', color: 'var(--or)' },
-          { medal: 'ðŸ’¡', label: 'You Might Also Need', color: 'var(--cy)' },
-          { medal: 'ðŸ”', label: 'Bonus Recommendation', color: 'var(--tx2)' }
+          { medal: '🎯', label: 'Matched For You', color: 'var(--or)' },
+          { medal: '💡', label: 'You Might Also Need', color: 'var(--cy)' },
+          { medal: '🔁', label: 'Bonus Recommendation', color: 'var(--tx2)' }
         ];
 
         top3.forEach(function (item, idx) {
@@ -3303,16 +3303,16 @@
           html += '<div class="feedback-wrap">'
             + '<div class="feedback-q">Was this recommendation helpful?</div>'
             + '<div class="fb-btns">'
-            + '<button class="fb-btn fb-up" onclick="giveFeedback(\'up\')">ðŸ‘ Yes, perfect!</button>'
-            + '<button class="fb-btn fb-down" onclick="giveFeedback(\'down\')">ðŸ‘Ž Not quite</button>'
+            + '<button class="fb-btn fb-up" onclick="giveFeedback(\'up\')">👍 Yes, perfect!</button>'
+            + '<button class="fb-btn fb-down" onclick="giveFeedback(\'down\')">👎 Not quite</button>'
             + '</div></div>';
         } else if (state.feedback === 'up') {
-          html += '<div class="feedback-given">âœ… &nbsp; Thank you! Great to hear â€” enjoy your supplement journey. ðŸ’ª</div>';
+          html += '<div class="feedback-given">✅ &nbsp; Thank you! Great to hear — enjoy your supplement journey. 💪</div>';
         } else {
-          html += '<div class="feedback-given-down">ðŸ” &nbsp; Thanks for letting us know â€” try adjusting your answers for a different match.</div>';
+          html += '<div class="feedback-given-down">🔁 &nbsp; Thanks for letting us know — try adjusting your answers for a different match.</div>';
         }
 
-        html += '<button class="restart-btn" onclick="restartChat()">â†º START OVER</button>';
+        html += '<button class="restart-btn" onclick="restartChat()">↺ START OVER</button>';
       }
 
       area.innerHTML = html;
@@ -3338,7 +3338,7 @@
       var whyListHtml = whyItems.map(function (w) { return '<div class="why-item">' + w + '</div>'; }).join('');
       return '<div class="prod-reveal"><div class="prod-shell">'
         + '<div class="prod-banner">'
-        + '<div class="prod-eye">âš¡ RECOMMENDED FOR YOU Â· FASTANDUP.IN</div>'
+        + '<div class="prod-eye">⚡ RECOMMENDED FOR YOU Â· FASTANDUP.IN</div>'
         + '<div class="prod-name">' + prod.name + '</div>'
         + '<div class="prod-desc">' + descText + '</div>'
         + '<div class="prod-cat">' + prod.category + '</div>'
@@ -3352,22 +3352,22 @@
         + '<div class="prod-body">'
         + '<div class="prod-image-wrap"><img src="' + imageSrc + '" alt="' + imageAlt + '" class="prod-image" onerror="this.onerror=null;this.src=\'./nightout.png\';"></div>'
         + '<div class="prod-div"></div>'
-          + '<div><div class="sec-head"><div class="sec-icon si-why">ðŸ”¬</div><div class="sec-ttl t-why">Deep Dive</div></div><div class="sec-txt">' + prod.why + '</div></div>'
+          + '<div><div class="sec-head"><div class="sec-icon si-why">🔬</div><div class="sec-ttl t-why">Deep Dive</div></div><div class="sec-txt">' + prod.why + '</div></div>'
           + '<div class="prod-div"></div>'
-          + '<div><div class="sec-head"><div class="sec-icon si-how">â±</div><div class="sec-ttl t-how">When &amp; How To Use</div></div><div class="sec-txt">' + prod.when + '</div></div>'
+          + '<div><div class="sec-head"><div class="sec-icon si-how">⏱</div><div class="sec-ttl t-how">When &amp; How To Use</div></div><div class="sec-txt">' + prod.when + '</div></div>'
           + '<div class="prod-div"></div>'
-          + '<div><div class="sec-head"><div class="sec-icon si-buy">ðŸ›’</div><div class="sec-ttl t-buy">Buy Official</div></div>'
-          + '<a class="buy-link" href="' + prod.url + '" target="_blank">Shop on fastandup.in <span>â†’</span></a>'
+          + '<div><div class="sec-head"><div class="sec-icon si-buy">🛒</div><div class="sec-ttl t-buy">Buy Official</div></div>'
+          + '<a class="buy-link" href="' + prod.url + '" target="_blank">Shop on fastandup.in <span>→</span></a>'
           + '<div class="brand-badges">' + badges + '</div></div>'
           + '<div class="prod-div"></div>'
-          + '<div><div class="sec-head"><div class="sec-icon si-why">âš¡</div><div class="sec-ttl t-why">Why This Product</div></div>'
+          + '<div><div class="sec-head"><div class="sec-icon si-why">⚡</div><div class="sec-ttl t-why">Why This Product</div></div>'
           + '<div class="why-list">' + whyListHtml + '</div></div>'
           + '</div></div></div>';
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
        CHAT ACTIONS
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    ═══════════════════════════════════════════ */
     function startChat() {
       resetState();
       renderChat();
@@ -3417,9 +3417,9 @@
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    /* ═══════════════════════════════════════════
        PARALLAX (intro screen)
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    ═══════════════════════════════════════════ */
     (function () {
       var orb1 = document.querySelector('.orb1'), orb2 = document.querySelector('.orb2');
       var tx = 0, ty = 0, nx = 0, ny = 0;
@@ -3438,7 +3438,3 @@
 </body>
 
 </html>
-
-
-
-

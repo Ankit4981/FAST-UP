@@ -701,7 +701,7 @@ export function ChatWidget() {
                   {!callActive ? (
                     <button
                       onClick={startCall}
-                      disabled={voiceStatus === "unsupported"}
+                      disabled={voiceStatus === "thinking" || voiceStatus === "speaking"}
                       className="flex items-center gap-2 rounded-full bg-brand-orange px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-brand-orangeDark disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <Phone size={16} />

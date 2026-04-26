@@ -146,14 +146,120 @@ export function CheckoutView() {
               Delivery Address
             </h2>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <input className="field" required placeholder="Full name" value={address.fullName} onChange={(event) => updateField("fullName", event.target.value)} />
-              <input className="field" required placeholder="Phone" value={address.phone} onChange={(event) => updateField("phone", event.target.value)} />
-              <input className="field sm:col-span-2" required type="email" placeholder="Email" value={address.email} onChange={(event) => updateField("email", event.target.value)} />
-              <input className="field sm:col-span-2" required placeholder="Address line 1" value={address.line1} onChange={(event) => updateField("line1", event.target.value)} />
-              <input className="field sm:col-span-2" placeholder="Address line 2" value={address.line2 ?? ""} onChange={(event) => updateField("line2", event.target.value)} />
-              <input className="field" required placeholder="City" value={address.city} onChange={(event) => updateField("city", event.target.value)} />
-              <input className="field" required placeholder="State" value={address.state} onChange={(event) => updateField("state", event.target.value)} />
-              <input className="field" required placeholder="Pincode" value={address.pincode} onChange={(event) => updateField("pincode", event.target.value)} />
+              <div>
+                <label htmlFor="checkout-fullname" className="compact-label mb-2 block">
+                  Full name
+                </label>
+                <input
+                  id="checkout-fullname"
+                  className="field"
+                  required
+                  autoComplete="name"
+                  placeholder="Full name"
+                  value={address.fullName}
+                  onChange={(event) => updateField("fullName", event.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="checkout-phone" className="compact-label mb-2 block">
+                  Phone
+                </label>
+                <input
+                  id="checkout-phone"
+                  className="field"
+                  required
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder="Phone number"
+                  value={address.phone}
+                  onChange={(event) => updateField("phone", event.target.value)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="checkout-email" className="compact-label mb-2 block">
+                  Email
+                </label>
+                <input
+                  id="checkout-email"
+                  className="field"
+                  required
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={address.email}
+                  onChange={(event) => updateField("email", event.target.value)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="checkout-line1" className="compact-label mb-2 block">
+                  Address line 1
+                </label>
+                <input
+                  id="checkout-line1"
+                  className="field"
+                  required
+                  autoComplete="address-line1"
+                  placeholder="Flat / house / street"
+                  value={address.line1}
+                  onChange={(event) => updateField("line1", event.target.value)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="checkout-line2" className="compact-label mb-2 block">
+                  Address line 2 (optional)
+                </label>
+                <input
+                  id="checkout-line2"
+                  className="field"
+                  autoComplete="address-line2"
+                  placeholder="Area / landmark"
+                  value={address.line2 ?? ""}
+                  onChange={(event) => updateField("line2", event.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="checkout-city" className="compact-label mb-2 block">
+                  City
+                </label>
+                <input
+                  id="checkout-city"
+                  className="field"
+                  required
+                  autoComplete="address-level2"
+                  placeholder="City"
+                  value={address.city}
+                  onChange={(event) => updateField("city", event.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="checkout-state" className="compact-label mb-2 block">
+                  State
+                </label>
+                <input
+                  id="checkout-state"
+                  className="field"
+                  required
+                  autoComplete="address-level1"
+                  placeholder="State"
+                  value={address.state}
+                  onChange={(event) => updateField("state", event.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="checkout-pincode" className="compact-label mb-2 block">
+                  Pincode
+                </label>
+                <input
+                  id="checkout-pincode"
+                  className="field"
+                  required
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  placeholder="Pincode"
+                  value={address.pincode}
+                  onChange={(event) => updateField("pincode", event.target.value)}
+                />
+              </div>
             </div>
 
             <div className="mt-8">

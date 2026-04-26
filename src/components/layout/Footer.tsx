@@ -3,10 +3,39 @@ import Link from "next/link";
 
 import { brandProfile, brandSocialLinks } from "@/lib/brand";
 
-const footerLinks = {
-  Shop: ["Sports Nutrition", "Daily Nutrition", "Plant Power", "Bundles"],
-  Support: ["Track Order", "Refunds", "Shipping", "FAQ"],
-  Company: ["About", "Partners", "Bulk Order", "Blogs"]
+type FooterLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+};
+
+const footerLinks: Record<string, FooterLink[]> = {
+  Shop: [
+    { label: "Sports Nutrition", href: "/products?category=Sports+Nutrition" },
+    { label: "Daily Nutrition", href: "/products?category=Daily+Nutrition" },
+    { label: "Plant Power", href: "/products?category=Plant+Power" },
+    { label: "Bundles", href: "/products?category=Bundles" }
+  ],
+  Support: [
+    { label: "Track Order", href: "/dashboard" },
+    { label: "Refunds", href: "/faq#returns-refunds" },
+    { label: "Shipping", href: "/faq#shipping-delivery" },
+    { label: "FAQ", href: "/faq" }
+  ],
+  Company: [
+    { label: "About", href: "/about" },
+    {
+      label: "Partners",
+      href: `mailto:${brandProfile.customerCareEmail}?subject=Partnership%20Enquiry`,
+      external: true
+    },
+    {
+      label: "Bulk Order",
+      href: `mailto:${brandProfile.customerCareEmail}?subject=Bulk%20Order%20Enquiry`,
+      external: true
+    },
+    { label: "Blogs", href: brandProfile.website, external: true }
+  ]
 };
 
 export function Footer() {
@@ -62,13 +91,25 @@ export function Footer() {
               </h3>
               <div className="mt-4 grid gap-3">
                 {links.map((link) => (
-                  <Link
-                    key={link}
-                    href={group === "Shop" ? `/products?search=${encodeURIComponent(link)}` : "/dashboard"}
-                    className="text-sm font-medium text-white/55 transition hover:text-brand-orange"
-                  >
-                    {link}
-                  </Link>
+                  link.external ? (
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      className="text-sm font-medium text-white/55 transition hover:text-brand-orange"
+                      rel="noreferrer"
+                      target={link.href.startsWith("http") ? "_blank" : undefined}
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      key={link.label}
+                      href={link.href}
+                      className="text-sm font-medium text-white/55 transition hover:text-brand-orange"
+                    >
+                      {link.label}
+                    </Link>
+                  )
                 ))}
               </div>
             </div>
@@ -79,7 +120,19 @@ export function Footer() {
       <div className="border-t border-white/10 py-5">
         <div className="container-page flex flex-col gap-2 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
           <span>{brandProfile.legalName}</span>
-          <span>Privacy | Terms | Nutrition disclaimer</span>
+          <span className="flex items-center gap-2">
+            <Link href="/privacy" className="hover:text-brand-orange">
+              Privacy
+            </Link>
+            <span>|</span>
+            <Link href="/terms" className="hover:text-brand-orange">
+              Terms
+            </Link>
+            <span>|</span>
+            <Link href="/disclaimer" className="hover:text-brand-orange">
+              Nutrition disclaimer
+            </Link>
+          </span>
         </div>
       </div>
     </footer>

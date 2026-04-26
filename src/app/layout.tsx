@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { ChatWidgetClient } from "@/components/chat/ChatWidgetClient";
-import { VoiceAgent } from "@/components/chat/VoiceAgent";
+import { VoiceAgent } from "@/components/voice/VoiceAgent"
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
 import { Providers } from "@/app/providers";
