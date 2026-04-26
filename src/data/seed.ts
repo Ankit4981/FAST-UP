@@ -38,7 +38,7 @@ export const seedProducts: Product[] = [
     description: "Clean energy, focus and endurance support before intense workouts.",
     longDescription:
       "A pre-workout formula designed for focused training sessions with caffeine, beta alanine and vitamins in a convenient effervescent format.",
-    images: ["/products/activate-preworkout.svg"],
+    images: ["/products/activate-preworkout.webp"],
     category: "Pre-Workout",
     rating: 4.7,
     reviewCount: 3245,
