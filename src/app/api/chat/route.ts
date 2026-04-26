@@ -11,13 +11,41 @@ import { getOrdersByEmail } from "@/lib/orders";
 import { checkRateLimit, getClientIp, rateLimitHeaders } from "@/lib/rateLimit";
 import type { ChatMessage } from "@/types";
 
-const ollamaClient = new OpenAI({
-  baseURL: process.env.OLLAMA_BASE_URL ?? "http://localhost:11434/v1",
-  apiKey: "ollama"
-});
-
+// ─── Constants ────────────────────────────────────────────────────────────────
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? "llama3";
+const GROQ_MODEL   = "llama3-8b-8192";
 
+// ─── AI client factory ────────────────────────────────────────────────────────
+// LOCAL  → NEXT_PUBLIC_USE_OLLAMA=true  in .env.local  → uses Ollama
+// PROD   → NEXT_PUBLIC_USE_OLLAMA=false in Vercel env  → uses Groq
+function getAiClient(): { client: OpenAI; model: string } {
+  const useOllama = process.env.NEXT_PUBLIC_USE_OLLAMA === "true";
+
+  if (useOllama) {
+    return {
+      client: new OpenAI({
+        baseURL: process.env.OLLAMA_BASE_URL ?? "http://localhost:11434/v1",
+        apiKey: "ollama" // Ollama doesn't need a real key
+      }),
+      model: OLLAMA_MODEL
+    };
+  }
+
+  const key = process.env.GROQ_API_KEY;
+  if (!key) {
+    throw new Error("GROQ_API_KEY is not set. Add it to Vercel environment variables.");
+  }
+
+  return {
+    client: new OpenAI({
+      baseURL: "https://api.groq.com/openai/v1",
+      apiKey: key
+    }),
+    model: GROQ_MODEL
+  };
+}
+
+// ─── Validation schema ────────────────────────────────────────────────────────
 const chatSchema = z.object({
   messages: z
     .array(
@@ -30,7 +58,7 @@ const chatSchema = z.object({
     .max(20)
 });
 
-// ─── 1. Stricter, structured SYSTEM PROMPT ───────────────────────────────────
+// ─── System prompt ────────────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `
 You are Fast&Up Coach, an ecommerce AI assistant for Fast&Up sports nutrition.
 
@@ -60,20 +88,19 @@ STYLE:
 - No long explanations unless explicitly asked
 `.trim();
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 function formatTranscript(messages: ChatMessage[]) {
   return messages
-    .slice(-8) // reduced from 12 — older turns rarely matter
+    .slice(-8)
     .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
     .join("\n");
 }
 
-// ─── 2. Relevance filtering — only send products the query actually needs ─────
 function filterRelevantProducts(
   products: Awaited<ReturnType<typeof getProducts>>,
   userMessage: string
 ) {
   const query = userMessage.toLowerCase();
-
   const matched = products.filter(
     (p) =>
       p.name.toLowerCase().includes(query) ||
@@ -81,25 +108,21 @@ function filterRelevantProducts(
       p.tags.some((tag) => query.includes(tag.toLowerCase())) ||
       p.goalTags.some((tag) => query.includes(tag.toLowerCase()))
   );
-
-  // fall back to featured/top-rated products if nothing keyword-matches
   const pool = matched.length > 0 ? matched : products;
   return pool.slice(0, 5);
 }
 
-// ─── 3. Relevance filtering for FAQ ──────────────────────────────────────────
 function filterRelevantFaqs(userMessage: string) {
   const query = userMessage.toLowerCase();
-
   const matched = faqData.filter(
     (faq) =>
       faq.question.toLowerCase().includes(query) ||
       faq.answer.toLowerCase().split(" ").some((word) => query.includes(word))
   );
-
   return (matched.length > 0 ? matched : faqData).slice(0, 3);
 }
 
+// ─── Route handler ────────────────────────────────────────────────────────────
 export async function POST(request: Request) {
   const rawBody = await request.json().catch(() => null);
   const parsed = chatSchema.safeParse(rawBody);
@@ -125,19 +148,17 @@ export async function POST(request: Request) {
     );
   }
 
-  // ─── Fetch data in parallel (unchanged) ────────────────────────────────────
+  // ─── Fetch data in parallel ───────────────────────────────────────────────
   const [allProducts, orders] = await Promise.all([
     getProducts({ limit: 5 }),
     getOrdersByEmail(session?.user?.email)
   ]);
 
-  // ─── Extract the latest user message for relevance filtering ───────────────
   const latestMessage = parsed.data.messages.at(-1)?.content ?? "";
 
-  // ─── 4. Build lean, relevant contexts ──────────────────────────────────────
+  // ─── Build lean, relevant contexts ───────────────────────────────────────
   const relevantProducts = filterRelevantProducts(allProducts, latestMessage);
 
-  // Stripped-down product format — model doesn't need IDs or MRP
   const productContext =
     relevantProducts.length > 0
       ? relevantProducts
@@ -163,7 +184,6 @@ export async function POST(request: Request) {
           .join("\n")
       : "No authenticated order records available.";
 
-  // ─── 5. Structured USER PROMPT ─────────────────────────────────────────────
   const userPrompt = `
 USER QUERY:
 ${latestMessage}
@@ -199,16 +219,37 @@ INSTRUCTION:
 Answer the USER QUERY using only the data above. Follow the output format in your system instructions.
 `.trim();
 
+  // ─── AI completion ────────────────────────────────────────────────────────
+  let aiClient: OpenAI;
+  let aiModel: string;
+
   try {
-    const response = await ollamaClient.chat.completions.create({
-      model: OLLAMA_MODEL,
+    const { client, model } = getAiClient();
+    aiClient = client;
+    aiModel  = model;
+  } catch (error) {
+    // GROQ_API_KEY missing — fail fast with a clear message
+    console.error("AI client setup failed:", error);
+    return NextResponse.json(
+      {
+        message:
+          process.env.NODE_ENV === "development"
+            ? "AI setup error: " + (error instanceof Error ? error.message : String(error))
+            : "AI assistant is not configured. Please contact support."
+      },
+      { status: 503, headers: rateLimitHeaders(rateLimit) }
+    );
+  }
+
+  try {
+    const response = await aiClient.chat.completions.create({
+      model: aiModel,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userPrompt }
+        { role: "user",   content: userPrompt }
       ],
-      // ─── 6. Lower temperature + tighter token cap ───────────────────────
-      temperature: 0.4, // was 0.7 — reduces rambling and hallucination
-      max_tokens: 250   // was 1024 — keeps responses sharp and fast
+      temperature: 0.4,
+      max_tokens:  250
     });
 
     const message =
@@ -220,25 +261,33 @@ Answer the USER QUERY using only the data above. Follow the output format in you
         message,
         usedContext: {
           products: relevantProducts.map((p) => p.id),
-          orders: orders.map((o) => o.orderNumber)
+          orders:   orders.map((o) => o.orderNumber)
         }
       },
       { status: 200, headers: rateLimitHeaders(rateLimit) }
     );
   } catch (error) {
-    console.error("Ollama chat failed:", error);
+    console.error("AI chat completion failed:", error);
 
-    // ─── 7. Helpful connection error ────────────────────────────────────────
+    const errMsg = error instanceof Error ? error.message : String(error);
+
     const isConnectionError =
-      error instanceof Error &&
-      (error.message.includes("ECONNREFUSED") || error.message.includes("fetch failed"));
+      errMsg.includes("ECONNREFUSED") || errMsg.includes("fetch failed") || errMsg.includes("ENOTFOUND");
+    const isAuthError =
+      errMsg.includes("401") || errMsg.includes("invalid_api_key");
+    const isTimeout =
+      errMsg.includes("timed out") || errMsg.includes("ETIMEDOUT");
+
+    const userMessage = isConnectionError
+      ? "AI assistant is offline. Make sure Ollama is running: `ollama serve`"
+      : isAuthError
+      ? "AI key is invalid. Check GROQ_API_KEY in your Vercel environment variables."
+      : isTimeout
+      ? "AI took too long to respond. Please try again."
+      : "I couldn't complete that response right now. Please try again.";
 
     return NextResponse.json(
-      {
-        message: isConnectionError
-          ? "AI assistant is offline. Make sure Ollama is running: `ollama serve`"
-          : "I couldn't complete that response right now. Please try again."
-      },
+      { message: userMessage },
       { status: 500, headers: rateLimitHeaders(rateLimit) }
     );
   }
