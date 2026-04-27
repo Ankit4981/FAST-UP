@@ -6,7 +6,8 @@ import {
   Search,
   ShoppingCart,
   UserRound,
-  X
+  X,
+  Zap
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
@@ -48,7 +49,6 @@ const navItems = [
   }
 ];
 
-// Isolated component so useSearchParams doesn't block static page rendering
 function ActiveNavLinks({ pathname }: { pathname: string }) {
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("category");
@@ -175,6 +175,16 @@ export function Navbar() {
         </form>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          {/* ✨ NEW: AI Advisor shortcut in top nav */}
+          <Link
+            href="/fastandup-advisor.html"
+            className="hidden items-center gap-1.5 rounded-full bg-brand-orange/10 px-3 py-1.5 text-xs font-bold text-brand-orange transition hover:bg-brand-orange hover:text-white lg:flex"
+            aria-label="Open AI Advisor"
+          >
+            <Zap size={13} aria-hidden />
+            AI Advisor
+          </Link>
+
           <Link
             href={session ? "/dashboard" : "/login"}
             className="btn-ghost hidden sm:flex"
@@ -212,17 +222,23 @@ export function Navbar() {
       <nav className="hidden border-t border-neutral-100 bg-white lg:block" aria-label="Primary navigation">
         <div className="container-page flex items-center justify-between">
           <div className="flex items-center">
-            {/* Suspense required because ActiveNavLinks uses useSearchParams */}
             <Suspense fallback={null}>
               <ActiveNavLinks pathname={pathname} />
             </Suspense>
           </div>
-          <Link
-            href="/products"
-            className="btn-primary h-8"
-          >
-            Shop all
-          </Link>
+          <div className="flex items-center gap-3">
+            {/* ✨ NEW: AI Advisor pill in secondary nav */}
+            <Link
+              href="/fastandup-advisor.html"
+              className="flex items-center gap-2 rounded-full border border-brand-orange/30 bg-brand-orange/8 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-brand-orange transition hover:bg-brand-orange hover:text-white"
+            >
+              <Zap size={13} />
+              AI Advisor
+            </Link>
+            <Link href="/products" className="btn-primary h-8">
+              Shop all
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -251,6 +267,15 @@ export function Navbar() {
             </button>
           </form>
           <div className="grid gap-2" aria-label="Mobile navigation links">
+            {/* ✨ NEW: AI Advisor prominent in mobile nav */}
+            <Link
+              href="/fastandup-advisor.html"
+              onClick={() => setMobileOpen(false)}
+              className="btn-primary justify-center gap-2"
+            >
+              <Zap size={16} />
+              Try AI Advisor — Free
+            </Link>
             {navItems.map((item) => (
               <Link
                 key={item.label}
@@ -264,7 +289,7 @@ export function Navbar() {
             <Link
               href="/products"
               onClick={() => setMobileOpen(false)}
-              className="btn-primary justify-start"
+              className="btn-secondary justify-start"
             >
               Shop all products
             </Link>
