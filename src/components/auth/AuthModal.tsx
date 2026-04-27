@@ -13,7 +13,9 @@ export function AuthModal() {
   const { isOpen, closeModal, pendingAction, clearPendingAction } = useAuthModal();
   const addItem = useCartStore((state) => state.addItem);
   const overlayRef = useRef<HTMLDivElement>(null);
-  const [tab, setTab] = useState<Tab>("login");
+
+  // Default to "signup" on first-visit open, "login" when triggered by cart action
+  const [tab, setTab] = useState<Tab>("signup");
 
   // Login state
   const [loginEmail, setLoginEmail] = useState("");
@@ -28,14 +30,14 @@ export function AuthModal() {
   const [signupError, setSignupError] = useState("");
   const [isSignupSubmitting, setIsSignupSubmitting] = useState(false);
 
-  // Reset on open
+  // Reset on open — show signup by default, but show login if cart action triggered it
   useEffect(() => {
     if (isOpen) {
-      setTab("login");
+      setTab(pendingAction ? "login" : "signup");
       setLoginError("");
       setSignupError("");
     }
-  }, [isOpen]);
+  }, [isOpen, pendingAction]);
 
   // Close on Escape
   useEffect(() => {
@@ -53,7 +55,9 @@ export function AuthModal() {
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
 
   function handleOverlayClick(e: React.MouseEvent) {
@@ -97,7 +101,11 @@ export function AuthModal() {
     const response = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: signupName, email: signupEmail, password: signupPassword }),
+      body: JSON.stringify({
+        name: signupName,
+        email: signupEmail,
+        password: signupPassword,
+      }),
     });
     const payload = await response.json();
 
@@ -126,7 +134,7 @@ export function AuthModal() {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-label="Login to continue"
+      aria-label="Sign up or log in"
     >
       <div className="relative w-full max-w-md animate-modal-in rounded-2xl border border-neutral-200 bg-white shadow-2xl">
         {/* Header */}
@@ -143,32 +151,26 @@ export function AuthModal() {
             <div className="mb-4 flex items-center gap-3 rounded-lg bg-brand-grey p-3">
               <span className="text-lg">🛒</span>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Item waiting</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  Item waiting
+                </p>
                 <p className="text-sm font-bold text-brand-black">{pendingAction.item.name}</p>
               </div>
             </div>
           )}
 
           <h2 className="font-display text-4xl font-black uppercase text-brand-black">
-            Login to continue
+            {pendingAction ? "Login to continue" : "Join Fast&Up"}
           </h2>
           <p className="mt-1 text-sm text-neutral-500">
-            Please log in to add items to your cart and continue.
+            {pendingAction
+              ? "Please log in to add items to your cart and continue."
+              : "Create a free account to track orders and get personalised recommendations."}
           </p>
         </div>
 
         {/* Tabs */}
         <div className="flex border-b border-neutral-100">
-          <button
-            onClick={() => setTab("login")}
-            className={`flex-1 py-3 text-sm font-bold transition ${
-              tab === "login"
-                ? "border-b-2 border-brand-orange text-brand-orange"
-                : "text-neutral-400 hover:text-neutral-700"
-            }`}
-          >
-            Login
-          </button>
           <button
             onClick={() => setTab("signup")}
             className={`flex-1 py-3 text-sm font-bold transition ${
@@ -179,68 +181,17 @@ export function AuthModal() {
           >
             Create account
           </button>
+          <button
+            onClick={() => setTab("login")}
+            className={`flex-1 py-3 text-sm font-bold transition ${
+              tab === "login"
+                ? "border-b-2 border-brand-orange text-brand-orange"
+                : "text-neutral-400 hover:text-neutral-700"
+            }`}
+          >
+            Login
+          </button>
         </div>
-
-        {/* Login form */}
-        {tab === "login" && (
-          <form onSubmit={submitLogin} className="p-6">
-            <div className="grid gap-4">
-              <div>
-                <label htmlFor="modal-login-email" className="compact-label mb-2 block">
-                  Email
-                </label>
-                <input
-                  id="modal-login-email"
-                  className="field"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  placeholder="you@example.com"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  autoFocus
-                />
-              </div>
-              <div>
-                <label htmlFor="modal-login-password" className="compact-label mb-2 block">
-                  Password
-                </label>
-                <input
-                  id="modal-login-password"
-                  className="field"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  placeholder="Your password"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {loginError && (
-              <p className="mt-4 rounded bg-red-50 p-3 text-sm font-semibold text-red-700">
-                {loginError}
-              </p>
-            )}
-
-            <button className="btn-primary mt-5 w-full" disabled={isLoginSubmitting}>
-              {isLoginSubmitting && <Loader2 className="animate-spin" size={16} />}
-              Login{pendingAction ? " & add to cart" : ""}
-            </button>
-
-            <p className="mt-4 text-center text-xs text-neutral-400">
-              Demo account:{" "}
-              <button
-                type="button"
-                className="font-semibold text-brand-orange underline"
-                onClick={() => { setLoginEmail("demo@fastup.dev"); setLoginPassword("Demo@1234"); }}
-              >
-                Fill demo credentials
-              </button>
-            </p>
-          </form>
-        )}
 
         {/* Signup form */}
         {tab === "signup" && (
@@ -304,6 +255,70 @@ export function AuthModal() {
               {isSignupSubmitting && <Loader2 className="animate-spin" size={16} />}
               Create account{pendingAction ? " & add to cart" : ""}
             </button>
+          </form>
+        )}
+
+        {/* Login form */}
+        {tab === "login" && (
+          <form onSubmit={submitLogin} className="p-6">
+            <div className="grid gap-4">
+              <div>
+                <label htmlFor="modal-login-email" className="compact-label mb-2 block">
+                  Email
+                </label>
+                <input
+                  id="modal-login-email"
+                  className="field"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  placeholder="you@example.com"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label htmlFor="modal-login-password" className="compact-label mb-2 block">
+                  Password
+                </label>
+                <input
+                  id="modal-login-password"
+                  className="field"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  placeholder="Your password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {loginError && (
+              <p className="mt-4 rounded bg-red-50 p-3 text-sm font-semibold text-red-700">
+                {loginError}
+              </p>
+            )}
+
+            <button className="btn-primary mt-5 w-full" disabled={isLoginSubmitting}>
+              {isLoginSubmitting && <Loader2 className="animate-spin" size={16} />}
+              Login{pendingAction ? " & add to cart" : ""}
+            </button>
+
+            <p className="mt-4 text-center text-xs text-neutral-400">
+              Demo account:{" "}
+              <button
+                type="button"
+                className="font-semibold text-brand-orange underline"
+                onClick={() => {
+                  setLoginEmail("demo@fastup.dev");
+                  setLoginPassword("Demo@1234");
+                }}
+              >
+                Fill demo credentials
+              </button>
+            </p>
           </form>
         )}
       </div>
