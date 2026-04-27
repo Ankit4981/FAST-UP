@@ -4,7 +4,7 @@ export const seedProducts: Product[] = [
   {
     id: "prod_reload_electrolyte",
     slug: "reload-electrolyte",
-    name: "Reload Electrolyte",
+    name: "Fast&Up Reload",
     price: 559,
     mrp: 699,
     description: "Hydration tablets with five essential electrolytes for training, travel and hot days.",
@@ -14,7 +14,7 @@ export const seedProducts: Product[] = [
     category: "Sports Nutrition",
     rating: 4.8,
     reviewCount: 4821,
-    tags: ["hydration", "vegan", "electrolytes", "during-workout", "budget"],
+    tags: ["hydration", "vegan", "electrolytes", "during-workout", "budget", "reload"],
     goalTags: ["hydration", "endurance", "cramps"],
     flavours: [
       { name: "Orange", color: "#FF6B35" },
@@ -136,6 +136,58 @@ export const seedProducts: Product[] = [
     imageAccent: "#169B62"
   },
   {
+    id: "prod_whey_protein",
+    slug: "fastup-whey-protein",
+    name: "Fast&Up Whey Protein",
+    price: 1699,
+    mrp: 2099,
+    description: "High-quality whey isolate blend for lean muscle gain and faster recovery.",
+    longDescription:
+      "A premium whey protein formula built for gym performance and daily muscle repair. Delivers complete amino support, fast absorption and low sugar to support strength-focused routines.",
+    images: ["/products/plant-protein.webp"],
+    category: "Sports Nutrition",
+    rating: 4.7,
+    reviewCount: 2648,
+    tags: ["protein", "whey", "muscle", "recovery", "premium", "post-workout"],
+    goalTags: ["muscle gain", "recovery", "strength"],
+    flavours: [
+      { name: "Chocolate", color: "#5C3A21" },
+      { name: "Vanilla", color: "#E7D2A9" }
+    ],
+    badge: "Top Protein",
+    nutrition: ["25 g protein", "Whey isolate blend", "Low sugar", "BCAA rich"],
+    howToUse: "Mix one scoop in 250 ml chilled water after training or between meals.",
+    stock: 34,
+    featured: true,
+    imageAccent: "#6B3F2A"
+  },
+  {
+    id: "prod_vitamin_c",
+    slug: "fastup-vitamin-c",
+    name: "Fast&Up Vitamin C",
+    price: 449,
+    mrp: 599,
+    description: "Daily vitamin C support with zinc for immunity and recovery resilience.",
+    longDescription:
+      "A daily effervescent immunity formula with vitamin C and zinc to support immune defence, collagen health and recovery from active stress.",
+    images: ["/products/vitalize-multivitamin.webp"],
+    category: "Daily Nutrition",
+    rating: 4.6,
+    reviewCount: 1976,
+    tags: ["immunity", "vitamin c", "daily", "budget", "vegan", "zinc"],
+    goalTags: ["immunity", "daily wellness", "energy"],
+    flavours: [
+      { name: "Orange", color: "#F97316" },
+      { name: "Lemon", color: "#FACC15" }
+    ],
+    badge: "Immunity",
+    nutrition: ["Vitamin C", "Zinc", "Antioxidants", "Effervescent absorption"],
+    howToUse: "Take one tablet daily in 250 ml water after breakfast.",
+    stock: 66,
+    featured: true,
+    imageAccent: "#F97316"
+  },
+  {
     id: "prod_collagen_glow",
     slug: "collagen-glow",
     name: "Collagen Glow",
@@ -232,7 +284,7 @@ export const demoOrders: Order[] = [
     items: [
       {
         productId: "prod_reload_electrolyte",
-        name: "Reload Electrolyte",
+        name: "Fast&Up Reload",
         slug: "reload-electrolyte",
         image: "/products/reload-electrolyte.webp",
         price: 559,

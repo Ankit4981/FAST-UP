@@ -11,29 +11,28 @@ export function FloatingAdvisorButton({ asCtaButton = false }: Props) {
   if (asCtaButton) {
     return (
       <Link
-        href="/fastandup-advisor.html"
+        href="/#health-calculator"
         className="btn-primary mt-8 inline-flex items-center gap-2 px-8 py-3 text-base"
       >
         <Zap size={18} />
-        Start AI Advisor — It&apos;s Free
+        Open Health Calculator
       </Link>
     );
   }
 
   return (
     <Link
-      href="/fastandup-advisor.html"
-      aria-label="Open AI Product Advisor"
+      href="/#health-calculator"
+      aria-label="Open Health Calculator"
       className="group fixed bottom-6 left-4 z-40 inline-flex items-center gap-2 rounded-full bg-brand-orange px-4 py-3 text-sm font-bold text-white shadow-lift transition hover:-translate-y-0.5 hover:bg-brand-orangeDark sm:bottom-6 sm:left-6"
     >
-      {/* Subtle static ring — no continuous animation to avoid dev-mode repaints */}
       <span
         className="absolute inset-0 -z-10 rounded-full bg-brand-orange/20 ring-2 ring-brand-orange/30"
         aria-hidden
       />
       <Zap size={20} />
       <span className="max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-200 group-hover:max-w-44 group-hover:opacity-100 sm:max-w-44 sm:opacity-100">
-        Get AI Recommendation
+        Calculate Your Plan
       </span>
     </Link>
   );

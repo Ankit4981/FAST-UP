@@ -5,8 +5,8 @@
 :root {
   color-scheme: light;
   --header-height: 118px;
-  --font-barlow: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-barlow-condensed: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-barlow: var(--font-sora), "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-barlow-condensed: var(--font-rajdhani), "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
 }
 
 * {
@@ -19,8 +19,8 @@ html {
 
 body {
   min-height: 100vh;
-  background: #fbfbfb;
-  color: #171717;
+  background: #f6f8fc;
+  color: #101726;
   font-family: var(--font-barlow), Arial, sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

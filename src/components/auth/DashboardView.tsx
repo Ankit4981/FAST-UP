@@ -3,15 +3,19 @@
 import { Loader2, PackageCheck, UserRound } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { Order } from "@/types";
 import { formatPrice, getInitials } from "@/lib/utils";
+import { createProgressInsight, goalMeta, type SavedHealthSnapshot } from "@/lib/wellnessEngine";
+
+const REPORT_STORAGE_KEY = "fastup-health-reports-v1";
 
 export function DashboardView() {
   const { data: session, status } = useSession();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [healthReports, setHealthReports] = useState<SavedHealthSnapshot[]>([]);
 
   useEffect(() => {
     if (status !== "authenticated") {
@@ -25,6 +29,24 @@ export function DashboardView() {
       .finally(() => setIsLoading(false))
       .catch(() => setIsLoading(false));
   }, [status]);
+
+  useEffect(() => {
+    const raw = window.localStorage.getItem(REPORT_STORAGE_KEY);
+    if (!raw) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as SavedHealthSnapshot[];
+      if (Array.isArray(parsed)) {
+        setHealthReports(parsed);
+      }
+    } catch {
+      setHealthReports([]);
+    }
+  }, []);
+
+  const progress = useMemo(() => createProgressInsight(healthReports), [healthReports]);
 
   if (status === "loading") {
     return (
@@ -98,6 +120,53 @@ export function DashboardView() {
               <Link href="/products" className="btn-secondary px-4 py-2 text-sm">
                 Shop more
               </Link>
+            </div>
+
+            <div className="mt-5 rounded-lg border border-neutral-200 bg-brand-grey p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="font-display text-2xl font-black uppercase text-brand-black">
+                  Health Dashboard
+                </h3>
+                <Link href="/#smart-calculator" className="btn-secondary h-8 px-3 text-xs">
+                  Update Plan
+                </Link>
+              </div>
+
+              {healthReports.length > 0 ? (
+                <>
+                  <p className="mt-2 text-sm text-neutral-600">{progress.trend}</p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                    <div className="rounded bg-white p-3">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+                        Score Delta
+                      </p>
+                      <p className="font-display text-3xl font-black text-brand-black">
+                        {progress.scoreDelta >= 0 ? "+" : ""}
+                        {progress.scoreDelta}
+                      </p>
+                    </div>
+                    <div className="rounded bg-white p-3">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+                        Weight Delta
+                      </p>
+                      <p className="font-display text-3xl font-black text-brand-black">
+                        {progress.weightDelta >= 0 ? "+" : ""}
+                        {progress.weightDelta}
+                      </p>
+                    </div>
+                    <div className="rounded bg-white p-3">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Latest Goal</p>
+                      <p className="font-display text-2xl font-black text-brand-black">
+                        {goalMeta[healthReports[0].goal].label}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p className="mt-2 text-sm text-neutral-500">
+                  No saved health reports yet. Run the Smart Health Calculator and save your first plan.
+                </p>
+              )}
             </div>
 
             {isLoading ? (

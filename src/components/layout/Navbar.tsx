@@ -49,6 +49,13 @@ const navItems = [
   }
 ];
 
+const goalQuickLinks = [
+  { label: "Weight Loss", href: "/#health-calculator" },
+  { label: "Muscle Gain", href: "/#featured-products" },
+  { label: "Energy & Hydration", href: "/#health-calculator" },
+  { label: "Immunity", href: "/#featured-products" }
+];
+
 function ActiveNavLinks({ pathname }: { pathname: string }) {
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("category");
@@ -177,12 +184,12 @@ export function Navbar() {
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
           {/* ✨ NEW: AI Advisor shortcut in top nav */}
           <Link
-            href="/fastandup-advisor.html"
+            href="/#health-calculator"
             className="hidden items-center gap-1.5 rounded-full bg-brand-orange/10 px-3 py-1.5 text-xs font-bold text-brand-orange transition hover:bg-brand-orange hover:text-white lg:flex"
             aria-label="Open AI Advisor"
           >
             <Zap size={13} aria-hidden />
-            AI Advisor
+            AI Recommender
           </Link>
 
           <Link
@@ -227,13 +234,24 @@ export function Navbar() {
             </Suspense>
           </div>
           <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-1 xl:flex">
+              {goalQuickLinks.map((goal) => (
+                <Link
+                  key={goal.label}
+                  href={goal.href}
+                  className="rounded-full border border-neutral-200 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-neutral-500 transition hover:border-brand-orange hover:text-brand-orange"
+                >
+                  {goal.label}
+                </Link>
+              ))}
+            </div>
             {/* ✨ NEW: AI Advisor pill in secondary nav */}
             <Link
-              href="/fastandup-advisor.html"
+              href="/#health-calculator"
               className="flex items-center gap-2 rounded-full border border-brand-orange/30 bg-brand-orange/8 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-brand-orange transition hover:bg-brand-orange hover:text-white"
             >
               <Zap size={13} />
-              AI Advisor
+              AI Recommender
             </Link>
             <Link href="/products" className="btn-primary h-8">
               Shop all
@@ -269,12 +287,12 @@ export function Navbar() {
           <div className="grid gap-2" aria-label="Mobile navigation links">
             {/* ✨ NEW: AI Advisor prominent in mobile nav */}
             <Link
-              href="/fastandup-advisor.html"
+              href="/#health-calculator"
               onClick={() => setMobileOpen(false)}
               className="btn-primary justify-center gap-2"
             >
               <Zap size={16} />
-              Try AI Advisor — Free
+              Try AI Recommender — Free
             </Link>
             {navItems.map((item) => (
               <Link
@@ -306,3 +324,4 @@ export function Navbar() {
     </header>
   );
 }
+
