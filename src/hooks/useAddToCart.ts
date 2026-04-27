@@ -19,7 +19,7 @@ export function useAddToCart() {
   // After login completes, if there's a pending action and we're now authenticated, execute it
   useEffect(() => {
     if (status === "authenticated" && pendingAction?.type === "add_to_cart") {
-      addItem(pendingAction.item);
+      addItem(pendingAction.item, pendingAction.item.quantity);
       clearPendingAction();
       flashAdded();
     }
@@ -47,7 +47,7 @@ export function useAddToCart() {
       // Already authenticated — add directly
       setAddState("adding");
       setTimeout(() => {
-        addItem({ ...product, quantity });
+        addItem(product, quantity);
         flashAdded();
       }, 150); // small delay for perceived feedback
     },
