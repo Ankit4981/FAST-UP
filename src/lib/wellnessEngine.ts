@@ -461,6 +461,261 @@ function findProductBySignals(products: Product[], signals: string[]) {
   });
 }
 
+function findProductByAnySignals(products: Product[], signals: string[]) {
+  return products.find((product) => {
+    const text = `${product.name} ${product.category} ${product.tags.join(" ")} ${product.goalTags.join(" ")}`.toLowerCase();
+    return signals.some((signal) => text.includes(signal));
+  });
+}
+
+function hasAllSignals(text: string, signals: string[]) {
+  return signals.every((signal) => text.includes(signal));
+}
+
+function hasToken(text: string, words: string[]) {
+  const tokens = new Set(text.split(" ").filter(Boolean));
+  return words.some((word) => tokens.has(word));
+}
+
+function extractWeightFromText(text: string): number | undefined {
+  const withKg = text.match(/\b(\d{2,3})\s?(kg|kgs|kilogram|kilograms)\b/);
+  if (withKg) {
+    const value = Number(withKg[1]);
+    if (value >= 35 && value <= 220) {
+      return value;
+    }
+  }
+
+  const withWeightKeyword = text.match(/\bweight\s*(?:is|=|:)?\s*(\d{2,3})\b/);
+  if (withWeightKeyword) {
+    const value = Number(withWeightKeyword[1]);
+    if (value >= 35 && value <= 220) {
+      return value;
+    }
+  }
+
+  return undefined;
+}
+
+function getProteinRangeByGoal(goal: GoalKey) {
+  switch (goal) {
+    case "weight_loss":
+      return { min: 1.8, max: 2.2 };
+    case "muscle_gain":
+      return { min: 1.8, max: 2.4 };
+    case "energy_hydration":
+      return { min: 1.4, max: 1.8 };
+    case "immunity":
+      return { min: 1.2, max: 1.6 };
+    default:
+      return { min: 1.6, max: 2 };
+  }
+}
+
+function buildProteinIntakeReply(text: string, products: Product[], goal: GoalKey) {
+  const proteinProduct =
+    findProductByAnySignals(products, ["whey", "protein", "plant protein"]) ?? products[0];
+  const weight = extractWeightFromText(text);
+  const proteinRange = getProteinRangeByGoal(goal);
+
+  if (!weight) {
+    return [
+      `For ${goalMeta[goal].label.toLowerCase()}, target about ${proteinRange.min.toFixed(1)}-${proteinRange.max.toFixed(1)} g protein per kg bodyweight daily.`,
+      `Use ${proteinProduct.name} to close your daily protein gap consistently.`,
+      "Share your weight in kg and I can give your exact protein range."
+    ].join("\n");
+  }
+
+  const min = Math.round(weight * proteinRange.min);
+  const max = Math.round(weight * proteinRange.max);
+
+  return [
+    `At ${weight} kg, your protein target is about ${min}-${max} g/day for ${goalMeta[goal].label.toLowerCase()}.`,
+    `A practical option is ${proteinProduct.name} (${formatPrice(proteinProduct.price)}).`,
+    "Split protein across 3-5 meals and include a post-workout serving."
+  ].join("\n");
+}
+
+function buildTopPicksReply(products: Product[], goal: GoalKey) {
+  return buildGoalReply(goal, products);
+}
+
+function buildWheyVsPlantReply(products: Product[]) {
+  const whey = findProductBySignals(products, ["whey"]) ?? findProductByAnySignals(products, ["protein"]) ?? products[0];
+  const plant = findProductBySignals(products, ["plant"]) ?? findProductByAnySignals(products, ["vegan"]) ?? products[1] ?? whey;
+
+  return [
+    `Whey (like ${whey.name}) usually has faster absorption and is great post-workout.`,
+    `Plant options (like ${plant.name}) are ideal for vegan or dairy-sensitive users.`,
+    "Pick based on digestion preference and diet style, not hype."
+  ].join("\n");
+}
+
+function buildBeginnerStackReply(products: Product[]) {
+  const hydration = findProductByAnySignals(products, ["reload", "hydration", "electrolyte"]) ?? products[0];
+  const protein = findProductByAnySignals(products, ["protein", "whey", "plant"]) ?? products[1] ?? products[0];
+  const daily = findProductByAnySignals(products, ["multivitamin", "vitamin", "daily", "immunity"]) ?? products[2] ?? products[0];
+
+  return [
+    `Starter stack: ${hydration.name} + ${protein.name} + ${daily.name}.`,
+    "Use hydration around training, protein after workouts, and daily support with breakfast.",
+    "Keep this routine for 6-8 weeks before making changes."
+  ].join("\n");
+}
+
+function buildComparisonReply(text: string, products: Product[], goal: GoalKey) {
+  const relevant = products.filter((product) => {
+    const indexText = `${product.name} ${product.category} ${product.tags.join(" ")} ${product.goalTags.join(" ")}`.toLowerCase();
+    return text.split(" ").some((token) => token.length > 2 && indexText.includes(token));
+  });
+
+  const pool = relevant.length >= 2 ? relevant.slice(0, 2) : recommendSupplements(products, getDefaultHealthInputs(goal), calculateHealthReport(getDefaultHealthInputs(goal)), 2).map((item) => item.product);
+  const first = pool[0];
+  const second = pool[1] ?? pool[0];
+
+  if (!first || !second) {
+    return "Tell me which two products you want to compare, and I will break down use case, timing and budget.";
+  }
+
+  return [
+    `${first.name}: better for ${first.goalTags.slice(0, 2).join(" + ")}.`,
+    `${second.name}: better for ${second.goalTags.slice(0, 2).join(" + ")}.`,
+    "Choose based on your current goal, then lock usage consistency for at least 4 weeks."
+  ].join("\n");
+}
+
+function extractWeightFromLbText(text: string): number | undefined {
+  const withLb = text.match(/\b(\d{2,3})\s?(lb|lbs|pound|pounds)\b/);
+  if (!withLb) {
+    return undefined;
+  }
+
+  const lbValue = Number(withLb[1]);
+  if (lbValue < 80 || lbValue > 500) {
+    return undefined;
+  }
+
+  return Math.round(lbValue * 0.453592);
+}
+
+function buildHydrationTargetReply(text: string, products: Product[]) {
+  const hydrationProduct =
+    findProductByAnySignals(products, ["reload", "electrolyte", "hydration"]) ?? products[0];
+
+  if (!hydrationProduct) {
+    return "Stay hydrated through the day and during workouts. Use the calculator for personalized hydration and nutrition guidance.";
+  }
+
+  const weightKg = extractWeightFromText(text) ?? extractWeightFromLbText(text);
+
+  if (!weightKg) {
+    return [
+      "A practical hydration target is usually around 30-40 ml per kg bodyweight daily, then extra based on sweat loss.",
+      `Use ${hydrationProduct.name} around hard workouts or long runs for electrolyte support.`,
+      "Share your weight and workout duration for a more exact hydration target."
+    ].join("\n");
+  }
+
+  const dailyMin = Math.round(weightKg * 30);
+  const dailyMax = Math.round(weightKg * 40);
+
+  return [
+    `At about ${weightKg} kg, target roughly ${dailyMin}-${dailyMax} ml water daily before adding workout sweat losses.`,
+    `For intense sessions, include ${hydrationProduct.name} to replenish electrolytes.`,
+    "Check urine color (pale yellow is ideal) and adjust fluids based on heat and training time."
+  ].join("\n");
+}
+
+function buildBudgetStackReply(products: Product[], goal: GoalKey) {
+  const fallbackPicks = recommendSupplements(
+    products,
+    getDefaultHealthInputs(goal),
+    calculateHealthReport(getDefaultHealthInputs(goal)),
+    5
+  ).map((item) => item.product);
+
+  const budgetPicks = [...fallbackPicks]
+    .sort((a, b) => a.price - b.price)
+    .slice(0, 3);
+
+  if (!budgetPicks.length) {
+    return "I can build a budget stack once products are available. Try the Smart Calculator for a goal-first plan.";
+  }
+
+  const list = budgetPicks.map((item) => `${item.name} (${formatPrice(item.price)})`).join(", ");
+  return [
+    `Budget-friendly picks for ${goalMeta[goal].label.toLowerCase()}: ${list}.`,
+    "Start with 1-2 core products first, stay consistent for 4 weeks, then scale if needed.",
+    "I can also rank these by your exact goal, diet and activity level."
+  ].join("\n");
+}
+
+function buildWeightGainReply(products: Product[]) {
+  const protein = findProductByAnySignals(products, ["whey", "protein", "plant"]) ?? products[0];
+  const pre = findProductByAnySignals(products, ["activate", "pre-workout", "energy"]) ?? products[1] ?? protein;
+  const recovery = findProductByAnySignals(products, ["recover", "recovery", "bcaa"]) ?? products[2] ?? protein;
+
+  if (!protein) {
+    return "For healthy weight gain, use a mild calorie surplus, progressive strength training, and high-protein meals.";
+  }
+
+  return [
+    "For clean weight gain, keep a mild calorie surplus and train with progressive overload.",
+    `Base stack: ${protein.name} + ${pre.name} + ${recovery.name}.`,
+    "Aim for steady weekly gain instead of fast fat gain."
+  ].join("\n");
+}
+
+function buildPlateauReply(products: Product[], goal: GoalKey) {
+  const picks = recommendSupplements(
+    products,
+    getDefaultHealthInputs(goal),
+    calculateHealthReport(getDefaultHealthInputs(goal)),
+    2
+  );
+
+  const best = picks[0]?.product;
+  if (!best) {
+    return "If progress has stalled, review sleep, training load, protein consistency and hydration first.";
+  }
+
+  return [
+    "Plateaus are usually solved by tightening sleep, protein intake, workout progression and hydration consistency.",
+    `Use ${best.name} consistently while tracking weekly body and performance trends.`,
+    "If no change after 3-4 weeks, adjust calories or training volume."
+  ].join("\n");
+}
+
+function buildFastingReply(products: Product[]) {
+  const hydration = findProductByAnySignals(products, ["reload", "electrolyte", "hydration"]) ?? products[0];
+  const protein = findProductByAnySignals(products, ["protein", "whey", "plant"]) ?? products[1] ?? hydration;
+
+  if (!hydration) {
+    return "During fasting routines, focus on hydration, training quality and total daily protein in your eating window.";
+  }
+
+  return [
+    "During intermittent fasting, prioritize hydration in fasting hours and protein in eating windows.",
+    `Use ${hydration.name} for electrolyte support and ${protein.name} to hit daily protein goals.`,
+    "Train near your first major meal when possible for better recovery."
+  ].join("\n");
+}
+
+function buildWomenSpecificReply(products: Product[]) {
+  const women = findProductByAnySignals(products, ["women", "collagen", "daily wellness"]) ?? products[0];
+  const immunity = findProductByAnySignals(products, ["vitamin c", "immunity", "zinc"]) ?? products[1] ?? women;
+
+  if (!women) {
+    return "For women's fitness nutrition, build around protein, micronutrients, hydration and recovery consistency.";
+  }
+
+  return [
+    `A practical women's wellness stack can start with ${women.name} and ${immunity.name}.`,
+    "Keep protein intake consistent and match training intensity to recovery.",
+    "Use the Smart Calculator for exact calories and protein guidance."
+  ].join("\n");
+}
+
 export function generateSmartAssistantReply(params: {
   message: string;
   products: Product[];
@@ -473,12 +728,103 @@ export function generateSmartAssistantReply(params: {
     return "Tell me your goal, age, activity level and diet, and I will suggest the best 2-3 supplements.";
   }
 
-  if (hasAnySignal(text, ["hello", "hey", "coach"])) {
-    return "Hi, I can help with hydration, vegan muscle gain, calculator guidance, and product recommendations in a few seconds.";
+  const goal = detectGoalFromText(text) ?? params.fallbackGoal ?? "energy_hydration";
+
+  if (
+    hasAnySignal(text, ["good morning", "good evening", "good afternoon"]) ||
+    (hasToken(text, ["hi", "hello", "hey", "yo"]) && text.split(" ").length <= 7)
+  ) {
+    return [
+      "Hi, welcome to Fast&Up Coach.",
+      "I can help with protein targets, workout supplements, hydration, weight loss, muscle gain and daily wellness.",
+      "Tell me your goal and weight in kg for a more exact plan."
+    ].join("\n");
+  }
+
+  if (hasToken(text, ["thanks", "thank", "thx"])) {
+    return "You are welcome. If you share your goal and weight, I can refine your supplement plan further.";
+  }
+
+  if (hasAnySignal(text, ["how are you", "how r u", "how are u"])) {
+    return "I am doing great and ready to help. Tell me your fitness goal and I will guide your supplements, calories and protein plan.";
+  }
+
+  if (hasAnySignal(text, ["bye", "good night", "see you"])) {
+    return "Glad to help. Stay consistent with training, hydration and protein, and come back anytime for plan updates.";
+  }
+
+  if (hasAnySignal(text, ["who are you", "what can you do", "help me"])) {
+    return [
+      "I am your rule-based Fast&Up Coach.",
+      "I can answer supplement, gym and nutrition questions, suggest products, and guide you to calculator and advisor.",
+      "Try asking: protein target, hydration for running, vegan muscle gain, or best beginner stack."
+    ].join("\n");
   }
 
   if (hasAnySignal(text, ["bmi", "bmr", "calorie", "calculator", "health score"])) {
     return "Use Smart Health Calculator: enter age, gender, height, weight, activity and diet to get BMI, BMR, calories and exact supplement mapping in under 60 seconds.";
+  }
+
+  if (
+    hasAnySignal(text, ["what should i buy", "which supplement should i buy", "recommend supplement", "best supplement for me"]) ||
+    (hasAnySignal(text, ["recommend", "suggest"]) && hasAnySignal(text, ["supplement", "product", "stack"]))
+  ) {
+    return buildGoalReply(goal, params.products);
+  }
+
+  if (
+    hasAnySignal(text, ["protein intake", "protein target", "protein per day", "how much protein"]) ||
+    (hasToken(text, ["protein"]) && hasAnySignal(text, ["how much", "per day", "daily"]))
+  ) {
+    return buildProteinIntakeReply(text, params.products, goal);
+  }
+
+  if (hasAnySignal(text, ["best time protein", "when to take protein", "protein timing"])) {
+    const protein = findProductByAnySignals(params.products, ["whey", "protein", "plant"]) ?? params.products[0];
+    if (!protein) {
+      return "Protein timing is simple: spread protein through the day and include one serving after workouts.";
+    }
+    return [
+      `Use ${protein.name} after workouts or between meals to meet your daily target.`,
+      "You can split protein across 3-5 meals for better consistency and recovery.",
+      "Daily total protein matters more than perfect timing."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["how many calories", "calorie target", "daily calories", "maintenance calories"])) {
+    return [
+      "Calorie needs depend on age, weight, height, activity and goal.",
+      "Use the Smart Calculator for exact BMR and daily calories in under 60 seconds.",
+      "For fat loss use a mild deficit, and for muscle gain use a moderate surplus."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["macro", "carbs", "fats", "carb fat protein split"])) {
+    return [
+      "A practical split is protein first, fats moderate, and carbs adjusted to your training load.",
+      "Use Smart Calculator to get personalized protein, carbs and fats from your goal and body stats.",
+      "Consistency matters more than perfect percentages."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["water intake", "how much water", "hydration target", "litre", "liters", "litres"])) {
+    return buildHydrationTargetReply(text, params.products);
+  }
+
+  if (hasAllSignals(text, ["whey", "plant"]) || hasAnySignal(text, ["whey vs plant", "whey or plant"])) {
+    return buildWheyVsPlantReply(params.products);
+  }
+
+  if (hasAnySignal(text, ["lactose", "dairy issue", "dairy allergy", "cannot digest whey", "whey causes acne"])) {
+    const plant = findProductByAnySignals(params.products, ["plant", "vegan", "protein"]) ?? params.products[0];
+    if (!plant) {
+      return "If dairy causes issues, prefer plant-based protein and monitor digestion over 1-2 weeks.";
+    }
+    return [
+      "If dairy upsets your stomach, start with plant-based protein options.",
+      `A good fit can be ${plant.name}.`,
+      "Start with half serving for 3-4 days and increase as digestion feels comfortable."
+    ].join("\n");
   }
 
   if (hasAnySignal(text, ["hydration", "running"]) || hasAnySignal(text, ["run", "electrolyte"])) {
@@ -492,6 +838,28 @@ export function generateSmartAssistantReply(params: {
     ].join("\n");
   }
 
+  if (hasAnySignal(text, ["pre workout", "pre-workout", "before workout", "before gym"])) {
+    const pre = findProductByAnySignals(params.products, ["pre-workout", "activate", "energy"]) ?? params.products[0];
+    return [
+      `Take ${pre.name} about 20-30 minutes before training.`,
+      "Avoid late-night use if caffeine affects your sleep.",
+      "Hydrate well before and during your session."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["post workout", "after workout", "soreness", "recovery", "muscle pain"])) {
+    const recovery = findProductByAnySignals(params.products, ["recovery", "bcaa", "protein"]) ?? params.products[0];
+    return [
+      `For recovery, use ${recovery.name} soon after training.`,
+      "Pair it with adequate sleep and total daily protein intake.",
+      "If soreness stays high for days, reduce load and improve hydration."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["weight gain", "gain weight", "hard gainer", "hardgainer"])) {
+    return buildWeightGainReply(params.products);
+  }
+
   if (hasAnySignal(text, ["vegan", "muscle"]) || hasAnySignal(text, ["plant", "muscle"])) {
     const plantProtein = findProductBySignals(params.products, ["plant"]) ?? params.products[0];
     const recovery = findProductBySignals(params.products, ["recovery"]) ?? params.products[1];
@@ -500,6 +868,94 @@ export function generateSmartAssistantReply(params: {
       `For vegan muscle gain, choose ${plantProtein.name} as your daily protein base.`,
       `Add ${recovery.name} after training to support recovery and consistency.`,
       "Target high protein intake across meals and train with progressive overload."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["weight loss supplement", "fat loss supplement", "lose fat"])) {
+    return buildTopPicksReply(params.products, "weight_loss");
+  }
+
+  if (hasAnySignal(text, ["muscle gain supplement", "gain muscle", "bulk up"])) {
+    return buildTopPicksReply(params.products, "muscle_gain");
+  }
+
+  if (hasAnySignal(text, ["immunity", "daily wellness", "vitamin c", "zinc"])) {
+    return buildTopPicksReply(params.products, "immunity");
+  }
+
+  if (hasAnySignal(text, ["beginner", "new to gym", "starting gym", "starter"])) {
+    return buildBeginnerStackReply(params.products);
+  }
+
+  if (hasAnySignal(text, ["budget", "cheap", "affordable", "low price", "value for money"])) {
+    return buildBudgetStackReply(params.products, goal);
+  }
+
+  if (hasAnySignal(text, ["plateau", "not seeing results", "stuck", "not working", "no progress"])) {
+    return buildPlateauReply(params.products, goal);
+  }
+
+  if (hasAnySignal(text, ["intermittent fasting", "fasting diet", "fasted workout"])) {
+    return buildFastingReply(params.products);
+  }
+
+  if (hasAnySignal(text, ["women supplement", "female supplement", "pcos", "skin hair"])) {
+    return buildWomenSpecificReply(params.products);
+  }
+
+  if (hasAnySignal(text, ["side effect", "safe", "is it safe", "can i take daily"])) {
+    return [
+      "Use supplements as directed on label, stay hydrated, and avoid exceeding servings.",
+      "If you have a medical condition, pregnancy, or current medication, check with a clinician first.",
+      "Start one product at a time so your body response is clear."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["pregnant", "pregnancy", "breastfeeding", "lactating"])) {
+    return [
+      "During pregnancy or breastfeeding, do not self-start supplements without clinician approval.",
+      "Share product labels with your doctor to confirm suitability and dosage.",
+      "I can still help with general hydration and nutrition consistency guidance."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["diabetes", "thyroid", "bp", "blood pressure", "medication"])) {
+    return [
+      "If you have a medical condition or regular medication, confirm supplement choice with your clinician first.",
+      "Start with low-risk basics like hydration and general wellness support as advised.",
+      "Use one product at a time and monitor your response."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["teen", "15 year", "16 year", "17 year", "child", "kid"])) {
+    return [
+      "For teens, supplement use should be conservative and supervised by a parent and clinician.",
+      "Prioritize sleep, whole-food meals, hydration and training technique first.",
+      "If needed, choose age-appropriate products and follow label instructions strictly."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["how long", "when will i see results", "results time"])) {
+    return [
+      "Most users notice energy and hydration effects quickly, while body composition changes usually need 4-8 weeks.",
+      "Supplements work best with consistent training, nutrition and sleep.",
+      "Track weekly progress and adjust based on recovery and performance."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["rest day", "off day"])) {
+    return [
+      "On rest days, keep protein and hydration consistent to support recovery.",
+      "You may skip stimulant pre-workouts unless needed for activity.",
+      "Daily wellness supplements can continue as usual."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["creatine"])) {
+    return [
+      "Creatine is commonly used for strength and performance, typically with daily consistency.",
+      "If you want, I can suggest an alternative stack from the current Fast&Up catalog while you compare options.",
+      "Tell me your goal and I will map the closest in-catalog plan."
     ].join("\n");
   }
 
@@ -512,6 +968,10 @@ export function generateSmartAssistantReply(params: {
     ].join("\n");
   }
 
+  if (hasAnySignal(text, ["compare", "vs", "difference", "better than"])) {
+    return buildComparisonReply(text, params.products, goal);
+  }
+
   if (hasAnySignal(text, ["call", "talk", "expert", "phone", "consult"])) {
     return "Tap Talk to Expert, share your goal and intent, and we route you instantly to the right specialist queue with a fast callback ETA.";
   }
@@ -520,7 +980,6 @@ export function generateSmartAssistantReply(params: {
     return buildOrderReply(params.orders ?? []);
   }
 
-  const goal = detectGoalFromText(text) ?? params.fallbackGoal;
   if (goal) {
     return buildGoalReply(goal, params.products);
   }
