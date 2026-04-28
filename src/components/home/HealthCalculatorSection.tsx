@@ -121,7 +121,7 @@ export function HealthCalculatorSection({ products }: HealthCalculatorSectionPro
   }
 
   return (
-    <section id="health-calculator" className="section-shell bg-brand-grey" aria-labelledby="health-calc-heading">
+    <section id="smart-calculator" className="section-shell bg-brand-grey" aria-labelledby="health-calc-heading">
       <div className="container-page grid gap-8 lg:grid-cols-[1fr_1fr]">
         <div className="surface-card p-5 sm:p-6">
           <p className="eyebrow">Smart calculator</p>

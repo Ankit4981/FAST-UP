@@ -146,10 +146,17 @@ export default async function HomePage() {
             Get your health metrics and supplement guidance in one flow.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <a href="#health-calculator" className="btn-primary px-8 py-3 text-base">
+            <a href="#smart-calculator" className="btn-primary px-8 py-3 text-base">
               <Zap size={18} />
               Open Calculator
             </a>
+            <Link
+              href="/fastandup-advisor.html"
+              className="btn-secondary border-white/30 bg-white/10 px-8 py-3 text-base text-white hover:border-white hover:bg-white hover:text-brand-black"
+            >
+              Open Advisor
+              <ArrowRight size={18} />
+            </Link>
             <Link
               href="/products"
               className="btn-secondary border-white/30 bg-white/10 px-8 py-3 text-base text-white hover:border-white hover:bg-white hover:text-brand-black"

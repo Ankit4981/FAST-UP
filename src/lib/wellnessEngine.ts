@@ -454,6 +454,13 @@ function buildProductReply(query: string, products: Product[]) {
   ].join("\n");
 }
 
+function findProductBySignals(products: Product[], signals: string[]) {
+  return products.find((product) => {
+    const text = `${product.name} ${product.category} ${product.tags.join(" ")} ${product.goalTags.join(" ")}`.toLowerCase();
+    return signals.every((signal) => text.includes(signal));
+  });
+}
+
 export function generateSmartAssistantReply(params: {
   message: string;
   products: Product[];
@@ -466,8 +473,43 @@ export function generateSmartAssistantReply(params: {
     return "Tell me your goal, age, activity level and diet, and I will suggest the best 2-3 supplements.";
   }
 
+  if (hasAnySignal(text, ["hello", "hey", "coach"])) {
+    return "Hi, I can help with hydration, vegan muscle gain, calculator guidance, and product recommendations in a few seconds.";
+  }
+
   if (hasAnySignal(text, ["bmi", "bmr", "calorie", "calculator", "health score"])) {
     return "Use Smart Health Calculator: enter age, gender, height, weight, activity and diet to get BMI, BMR, calories and exact supplement mapping in under 60 seconds.";
+  }
+
+  if (hasAnySignal(text, ["hydration", "running"]) || hasAnySignal(text, ["run", "electrolyte"])) {
+    const reload = findProductBySignals(params.products, ["reload"]) ?? params.products[0];
+    const bundle = findProductBySignals(params.products, ["endurance"]) ?? params.products[1];
+
+    return [
+      `For running hydration, start with ${reload.name} at ${formatPrice(reload.price)}.`,
+      `If you need a full race-day stack, add ${bundle.name} for hydration plus recovery support.`,
+      "Use one serving before or during long runs and keep water intake steady."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["vegan", "muscle"]) || hasAnySignal(text, ["plant", "muscle"])) {
+    const plantProtein = findProductBySignals(params.products, ["plant"]) ?? params.products[0];
+    const recovery = findProductBySignals(params.products, ["recovery"]) ?? params.products[1];
+
+    return [
+      `For vegan muscle gain, choose ${plantProtein.name} as your daily protein base.`,
+      `Add ${recovery.name} after training to support recovery and consistency.`,
+      "Target high protein intake across meals and train with progressive overload."
+    ].join("\n");
+  }
+
+  if (hasAnySignal(text, ["tablet", "how to use", "fizz", "effervescent"])) {
+    const reload = findProductBySignals(params.products, ["reload"]) ?? params.products[0];
+    return [
+      "Drop one effervescent tablet in about 250 ml water, wait until fully dissolved, then drink.",
+      `For example, ${reload.name} works best before or during intense activity.`,
+      "Do not swallow the tablet directly."
+    ].join("\n");
   }
 
   if (hasAnySignal(text, ["call", "talk", "expert", "phone", "consult"])) {
