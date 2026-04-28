@@ -80,6 +80,10 @@ type QuizAnswers = {
 
 const REPORT_STORAGE_KEY = "fastup-health-reports-v1";
 const LEAD_STORAGE_KEY = "fastup-lead-captures-v1";
+const CHAT_GREETING = "Namaste! I am Rahul from Fast&Up. How can I help you today?";
+const CHAT_OPTIONS = "You can ask about: Product benefits, How to use, Track order, Offers";
+const CHAT_FALLBACK =
+  "I'm sorry, I didn't understand that. You can ask about benefits, usage, orders, or offers.";
 
 const goalCards: Array<{
   id: GoalKey;
@@ -266,8 +270,7 @@ export function WellnessLanding({ products }: WellnessLandingProps) {
   const [chatRows, setChatRows] = useState<ChatRow[]>([
     {
       role: "assistant",
-      content:
-        "I am your Smart Coach. Share your goal and I will recommend the best supplements with reasons."
+      content: CHAT_GREETING
     }
   ]);
   const [chatInput, setChatInput] = useState("");
@@ -360,8 +363,17 @@ export function WellnessLanding({ products }: WellnessLandingProps) {
   function runPlan(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const nextReport = calculateHealthReport(inputs);
-    const nextMatches = recommendSupplements(products, inputs, nextReport, 3);
+    const normalizedInputs: HealthInputs = {
+      ...inputs,
+      age: inputs.age > 0 ? inputs.age : defaultInputs.age,
+      heightCm: inputs.heightCm > 0 ? inputs.heightCm : defaultInputs.heightCm,
+      weightKg: inputs.weightKg > 0 ? inputs.weightKg : defaultInputs.weightKg
+    };
+
+    setInputs(normalizedInputs);
+
+    const nextReport = calculateHealthReport(normalizedInputs);
+    const nextMatches = recommendSupplements(products, normalizedInputs, nextReport, 3);
 
     setReport(nextReport);
     setMatches(nextMatches);
@@ -423,7 +435,7 @@ export function WellnessLanding({ products }: WellnessLandingProps) {
             role: "assistant",
             content:
               payload.message ??
-              "I could not fetch a full answer, but I can still help with goal-based supplement matching."
+              `${CHAT_FALLBACK}\n${CHAT_OPTIONS}`
           }
         ]);
       } else {
@@ -431,7 +443,7 @@ export function WellnessLanding({ products }: WellnessLandingProps) {
           ...current,
           {
             role: "assistant",
-            content: "I'm sorry, I didn't understand that. Could you please rephrase your question?"
+            content: `${CHAT_FALLBACK}\n${CHAT_OPTIONS}`
           }
         ]);
       }
@@ -440,7 +452,7 @@ export function WellnessLanding({ products }: WellnessLandingProps) {
         ...current,
         {
           role: "assistant",
-          content: "I'm sorry, I didn't understand that. Could you please rephrase your question?"
+          content: `${CHAT_FALLBACK}\n${CHAT_OPTIONS}`
         }
       ]);
     } finally {
@@ -677,9 +689,12 @@ export function WellnessLanding({ products }: WellnessLandingProps) {
                   type="number"
                   min={15}
                   max={85}
-                  value={inputs.age}
+                  value={inputs.age === 0 ? "" : inputs.age}
                   onChange={(event) =>
-                    setInputs((prev) => ({ ...prev, age: Number(event.target.value) || prev.age }))
+                    setInputs((prev) => ({
+                      ...prev,
+                      age: event.target.value === "" ? 0 : Number(event.target.value)
+                    }))
                   }
                   className="field"
                 />
@@ -706,9 +721,12 @@ export function WellnessLanding({ products }: WellnessLandingProps) {
                   type="number"
                   min={120}
                   max={220}
-                  value={inputs.heightCm}
+                  value={inputs.heightCm === 0 ? "" : inputs.heightCm}
                   onChange={(event) =>
-                    setInputs((prev) => ({ ...prev, heightCm: Number(event.target.value) || prev.heightCm }))
+                    setInputs((prev) => ({
+                      ...prev,
+                      heightCm: event.target.value === "" ? 0 : Number(event.target.value)
+                    }))
                   }
                   className="field"
                 />
@@ -720,9 +738,12 @@ export function WellnessLanding({ products }: WellnessLandingProps) {
                   type="number"
                   min={35}
                   max={220}
-                  value={inputs.weightKg}
+                  value={inputs.weightKg === 0 ? "" : inputs.weightKg}
                   onChange={(event) =>
-                    setInputs((prev) => ({ ...prev, weightKg: Number(event.target.value) || prev.weightKg }))
+                    setInputs((prev) => ({
+                      ...prev,
+                      weightKg: event.target.value === "" ? 0 : Number(event.target.value)
+                    }))
                   }
                   className="field"
                 />
@@ -1202,10 +1223,10 @@ export function WellnessLanding({ products }: WellnessLandingProps) {
 
             <div className="mt-5 flex flex-wrap gap-2">
               {[
-                "Best supplement for muscle gain?",
-                "How much protein should I take daily?",
-                "Guide me to the health calculator",
-                "I want immunity support"
+                "Product benefits",
+                "How to use",
+                "Track order",
+                "Offers"
               ].map((prompt) => (
                 <button key={prompt} className="chip" onClick={() => void sendCoachMessage(prompt)}>
                   {prompt}

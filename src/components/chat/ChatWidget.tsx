@@ -26,14 +26,17 @@ type ChatApiResponse = {
 
 const STORAGE_KEY = "fastandup-rule-chat-history";
 const STARTER_QUICK_REPLIES = ["Product benefits", "How to use", "Track order", "Offers"];
-const CALL_OPENING_SCRIPT =
-  "Namaste, my name is Rahul. I'm calling from Fast&Up. How can I help you today?";
+const START_GREETING = "Namaste! I am Rahul from Fast&Up. How can I help you today?";
+const OPTIONS_GUIDE =
+  "You can ask about: Product benefits, How to use, Track order, Offers";
+const CALL_OPENING_SCRIPT = START_GREETING;
+const FALLBACK_MESSAGE =
+  "I'm sorry, I didn't understand that. You can ask about benefits, usage, orders, or offers.";
 
 const STARTER_MESSAGES: ChatMessage[] = [
   {
     role: "assistant",
-    content:
-      "Namaste! I am Rahul from Fast&Up. Ask me about product benefits, usage, orders, delivery, or returns.",
+    content: START_GREETING,
   },
 ];
 
@@ -73,7 +76,7 @@ async function fetchRuleBasedReply(messages: ChatMessage[], endpoint: "/api/chat
   const payload = (await response.json()) as ChatApiResponse;
 
   return {
-    message: payload.message ?? "I'm sorry, I didn't understand that. Could you please rephrase your question?",
+    message: payload.message ?? `${FALLBACK_MESSAGE}\n${OPTIONS_GUIDE}`,
     quickReplies:
       payload.quickReplies && payload.quickReplies.length > 0
         ? payload.quickReplies
@@ -350,7 +353,7 @@ export function ChatWidget() {
         ...current,
         {
           role: "assistant",
-          content: "I'm sorry, I didn't understand that. Could you please rephrase your question?",
+          content: `${FALLBACK_MESSAGE}\n${OPTIONS_GUIDE}`,
         },
       ]);
       setQuickReplies(STARTER_QUICK_REPLIES);

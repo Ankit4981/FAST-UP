@@ -1,22 +1,21 @@
-import { seedProducts } from "@/data/seed";
-
 export type AgentMatchMode = "matched" | "clarify" | "fallback";
 
-export type RuleIntent = {
+type IntentCategory =
+  | "greeting"
+  | "benefits"
+  | "usage"
+  | "ingredients"
+  | "orders"
+  | "offers"
+  | "delivery"
+  | "fallback";
+
+type IntentDefinition = {
   id: string;
-  category:
-    | "product"
-    | "usage"
-    | "pricing"
-    | "orders"
-    | "delivery"
-    | "returns"
-    | "health"
-    | "greeting"
-    | "support";
-  trigger: string;
+  category: IntentCategory;
+  triggers: string[];
   response: string;
-  quickReplies: string[];
+  priority: number;
 };
 
 export type RuleAgentResult = {
@@ -24,680 +23,807 @@ export type RuleAgentResult = {
   message: string;
   quickReplies: string[];
   matchedIntentId?: string;
-  matchedTrigger?: string;
 };
 
-export const CALL_OPENING_SCRIPT =
-  "Namaste, my name is Rahul. I'm calling from Fast&Up. How can I help you today?";
+const QUICK_REPLIES = ["Product benefits", "How to use", "Track order", "Offers"];
 
-export const FALLBACK_MESSAGE =
-  "I'm sorry, I didn't understand that. Could you please rephrase your question?";
+const OPTIONS_LINE =
+  "You can ask about: Product benefits, How to use, Track order, Offers";
 
-const CLARIFY_MESSAGE =
-  "Please share your question clearly in one short line so I can help you better.";
+export const START_GREETING =
+  "Namaste! I am Rahul from Fast&Up. How can I help you today?";
 
-const DEFAULT_QUICK_REPLIES = [
-  "Product benefits",
-  "How to use",
-  "Track order",
-  "Offers",
-];
+export const CALL_OPENING_SCRIPT = START_GREETING;
 
-const PRODUCT_QUICK_REPLIES = [
-  "Benefits",
-  "How to use",
-  "Ingredients",
-  "Price",
-];
+export const FALLBACK_MESSAGE = "Sorry, I didn’t understand. Please rephrase.";
 
-const ORDER_QUICK_REPLIES = [
-  "Track order",
-  "Delivery time",
-  "Return policy",
-  "Talk to support",
-];
+const CLARIFY_MESSAGE = "Could you please clarify your question?";
 
-type ProductProfile = {
-  key: string;
-  name: string;
-  benefit: string;
-  usage: string;
-  ingredients: string;
-  price: string;
-  timing: string;
-  vegan: string;
-  bestFor: string;
-  dailyUse: string;
-  caution: string;
-  goal: string;
-};
-
-const productPriceByName = new Map(seedProducts.map((product) => [product.name, product.price]));
-
-const PRODUCT_PROFILES: ProductProfile[] = [
-  {
-    key: "reload",
-    name: "Fast&Up Reload",
-    benefit:
-      "Fast&Up Reload helps you stay hydrated and keeps your energy steady during workouts.",
-    usage: "Drop one tablet in 250 ml water and sip during activity.",
-    ingredients: "It includes five electrolytes and vitamin C with zero added sugar.",
-    price: `Current store price is Rs ${productPriceByName.get("Fast&Up Reload") ?? 559}.`,
-    timing: "Use it during workouts, runs, travel, or hot weather.",
-    vegan: "Yes, Fast&Up Reload is vegan.",
-    bestFor: "It is best for hydration, endurance support, and cramp prevention.",
-    dailyUse: "You can use one serving daily when hydration support is needed.",
-    caution: "Use as directed and consult your doctor if you have a medical condition.",
-    goal: "It supports hydration and sustained performance.",
-  },
-  {
-    key: "activate",
-    name: "Activate Pre-Workout",
-    benefit: "Activate Pre-Workout boosts workout energy, focus, and training intensity.",
-    usage: "Drop one tablet in 250 ml water and drink 20 minutes before training.",
-    ingredients: "It includes caffeine, beta alanine, and B vitamins.",
-    price: `Current store price is Rs ${productPriceByName.get("Activate Pre-Workout") ?? 749}.`,
-    timing: "Use it before gym or high-intensity training sessions.",
-    vegan: "Yes, Activate Pre-Workout is vegan.",
-    bestFor: "It is best for strength days, intense workouts, and focus.",
-    dailyUse: "Take one serving per day on training days.",
-    caution: "Avoid late-night use if you are sensitive to caffeine.",
-    goal: "It helps improve training drive and workout output.",
-  },
-  {
-    key: "vitalize",
-    name: "Vitalize Multivitamin",
-    benefit: "Vitalize Multivitamin supports daily immunity, energy, and overall wellness.",
-    usage: "Take one tablet in 250 ml water after breakfast.",
-    ingredients: "It has essential vitamins and minerals including vitamin D3 and zinc.",
-    price: `Current store price is Rs ${productPriceByName.get("Vitalize Multivitamin") ?? 479}.`,
-    timing: "Use once daily, preferably after breakfast.",
-    vegan: "This formula is vegetarian-friendly.",
-    bestFor: "It is best for busy routines and micronutrient support.",
-    dailyUse: "Yes, it is designed for daily use.",
-    caution: "Do not exceed the suggested serving unless advised by your doctor.",
-    goal: "It supports immunity and daily energy metabolism.",
-  },
-  {
-    key: "recover",
-    name: "Recover BCAA + Glutamine",
-    benefit: "Recover BCAA + Glutamine helps reduce soreness and speeds up recovery.",
-    usage: "Mix one scoop in 400 ml water and drink after workout.",
-    ingredients: "It provides BCAA, glutamine, electrolytes, and vitamin C.",
-    price: `Current store price is Rs ${productPriceByName.get("Recover BCAA + Glutamine") ?? 799}.`,
-    timing: "Use it after training for post-workout recovery support.",
-    vegan: "Yes, this formula is vegan.",
-    bestFor: "It is best for muscle recovery and repeated weekly training.",
-    dailyUse: "You can use it after each workout session.",
-    caution: "Use the recommended serving and stay hydrated.",
-    goal: "It supports recovery quality and muscle repair.",
-  },
-  {
-    key: "plant-protein",
-    name: "Plant Protein Performance",
-    benefit:
-      "Plant Protein Performance supports lean muscle growth and better daily recovery.",
-    usage: "Shake one scoop in 250 ml water or milk after workout.",
-    ingredients: "It includes pea protein, brown rice protein, and digestive enzymes.",
-    price: `Current store price is Rs ${productPriceByName.get("Plant Protein Performance") ?? 1499}.`,
-    timing: "Use post-workout or between meals for protein support.",
-    vegan: "Yes, it is 100% plant-based and vegan.",
-    bestFor: "It is best for vegan muscle support and clean protein intake.",
-    dailyUse: "Yes, one serving daily can support your protein target.",
-    caution: "Pair with balanced meals and enough water for best results.",
-    goal: "It helps you recover and build lean muscle with vegan protein.",
-  },
-  {
-    key: "whey-protein",
-    name: "Fast&Up Whey Protein",
-    benefit:
-      "Fast&Up Whey Protein helps build lean muscle and recover faster after workouts.",
-    usage: "Mix one scoop in 250 ml chilled water after training.",
-    ingredients: "It offers whey isolate blend, high protein, and natural BCAA support.",
-    price: `Current store price is Rs ${productPriceByName.get("Fast&Up Whey Protein") ?? 1699}.`,
-    timing: "Use it after workout or between meals.",
-    vegan: "No, whey protein is dairy-based and not vegan.",
-    bestFor: "It is best for gym users focused on strength and muscle gain.",
-    dailyUse: "Yes, one serving daily can help meet protein goals.",
-    caution: "If you are lactose-sensitive, start with a smaller serving.",
-    goal: "It supports strength gains, recovery, and muscle maintenance.",
-  },
-  {
-    key: "vitamin-c",
-    name: "Fast&Up Vitamin C",
-    benefit: "Fast&Up Vitamin C supports immunity and helps recovery from daily stress.",
-    usage: "Take one tablet in 250 ml water after breakfast.",
-    ingredients: "It contains vitamin C, zinc, and antioxidant support.",
-    price: `Current store price is Rs ${productPriceByName.get("Fast&Up Vitamin C") ?? 449}.`,
-    timing: "Use once daily, preferably after breakfast.",
-    vegan: "Yes, this formula is vegan.",
-    bestFor: "It is best for daily immunity and seasonal wellness support.",
-    dailyUse: "Yes, it is designed for daily use.",
-    caution: "Use only the suggested serving and consult your doctor if needed.",
-    goal: "It helps strengthen daily immune support.",
-  },
-  {
-    key: "collagen-glow",
-    name: "Collagen Glow",
-    benefit: "Collagen Glow supports skin hydration, hair strength, and daily glow.",
-    usage: "Dissolve one tablet in 250 ml water once daily.",
-    ingredients: "It includes collagen peptides, biotin, vitamin C, and antioxidants.",
-    price: `Current store price is Rs ${productPriceByName.get("Collagen Glow") ?? 899}.`,
-    timing: "Use once daily at a fixed time.",
-    vegan: "No, collagen formulas are usually not vegan.",
-    bestFor: "It is best for skin, hair, and nail support.",
-    dailyUse: "Yes, daily use gives better beauty nutrition results.",
-    caution: "Use as directed and stop if any discomfort appears.",
-    goal: "It helps support beauty-from-within nutrition.",
-  },
-  {
-    key: "kidz-immunity",
-    name: "Kidz Immunity Fizz",
-    benefit: "Kidz Immunity Fizz supports kids' immunity and active growth.",
-    usage: "Dissolve in water and serve as directed on pack with adult supervision.",
-    ingredients: "It provides vitamin C, zinc, and vitamin D3 with kid-friendly flavor.",
-    price: `Current store price is Rs ${productPriceByName.get("Kidz Immunity Fizz") ?? 399}.`,
-    timing: "Use once daily as directed on the pack.",
-    vegan: "Please check the label variant for dietary preference details.",
-    bestFor: "It is best for kids who need daily immunity nutrition support.",
-    dailyUse: "Yes, use only the suggested serving for your child's age.",
-    caution: "Always use under adult supervision and follow the pack instructions.",
-    goal: "It supports daily immune strength for kids.",
-  },
-  {
-    key: "marathon-bundle",
-    name: "Marathon Hydration Bundle",
-    benefit:
-      "Marathon Hydration Bundle supports energy, hydration, and recovery in one stack.",
-    usage:
-      "Use Activate before, Reload during, and Recover after endurance sessions.",
-    ingredients: "It combines pre-workout, electrolytes, and recovery nutrition.",
-    price: `Current store price is Rs ${productPriceByName.get("Marathon Hydration Bundle") ?? 1299}.`,
-    timing: "Use it for race week and long endurance training.",
-    vegan: "Most included products are vegan; check each pack for details.",
-    bestFor: "It is best for runners, cyclists, and endurance athletes.",
-    dailyUse: "Use each product as per training schedule and pack directions.",
-    caution: "Follow each product's serving guide for safe use.",
-    goal: "It improves race-day readiness and recovery.",
-  },
-];
-
-type ProductTemplate = {
-  key: string;
-  trigger: (profile: ProductProfile) => string;
-  response: (profile: ProductProfile) => string;
-};
-
-const PRODUCT_TEMPLATES: ProductTemplate[] = [
-  {
-    key: "what-is",
-    trigger: (profile) => `what is ${profile.name}`,
-    response: (profile) => profile.benefit,
-  },
-  {
-    key: "benefits",
-    trigger: (profile) => `benefits of ${profile.name}`,
-    response: (profile) => profile.benefit,
-  },
-  {
-    key: "how-to-use",
-    trigger: (profile) => `how to use ${profile.name}`,
-    response: (profile) => profile.usage,
-  },
-  {
-    key: "best-time",
-    trigger: (profile) => `best time to take ${profile.name}`,
-    response: (profile) => profile.timing,
-  },
-  {
-    key: "ingredients",
-    trigger: (profile) => `ingredients in ${profile.name}`,
-    response: (profile) => profile.ingredients,
-  },
-  {
-    key: "price",
-    trigger: (profile) => `price of ${profile.name}`,
-    response: (profile) => profile.price,
-  },
-  {
-    key: "vegan",
-    trigger: (profile) => `is ${profile.name} vegan`,
-    response: (profile) => profile.vegan,
-  },
-  {
-    key: "best-for",
-    trigger: (profile) => `who should use ${profile.name}`,
-    response: (profile) => profile.bestFor,
-  },
-  {
-    key: "daily-use",
-    trigger: (profile) => `can i take ${profile.name} daily`,
-    response: (profile) => profile.dailyUse,
-  },
-  {
-    key: "safety",
-    trigger: (profile) => `is ${profile.name} safe`,
-    response: (profile) => profile.caution,
-  },
-  {
-    key: "goal",
-    trigger: (profile) => `does ${profile.name} help with performance`,
-    response: (profile) => profile.goal,
-  },
-  {
-    key: "results-time",
-    trigger: (profile) => `how long for results with ${profile.name}`,
-    response: () =>
-      "Most users feel benefits in 1-2 weeks with regular use and proper hydration.",
-  },
-];
-
-type SupportTopic = {
-  key: string;
-  category: RuleIntent["category"];
-  prompts: [string, string];
-  response: string;
-  quickReplies: string[];
-};
-
-const SUPPORT_TOPICS: SupportTopic[] = [
-  {
-    key: "greeting",
-    category: "greeting",
-    prompts: ["hi", "namaste"],
-    response: "Namaste! I am Fast&Up Assistant Rahul. How can I help you today?",
-    quickReplies: DEFAULT_QUICK_REPLIES,
-  },
-  {
-    key: "help",
-    category: "support",
-    prompts: ["help me", "i need help"],
-    response: "Sure. Please choose product info, order help, delivery, or returns.",
-    quickReplies: ["Product info", "Order help", "Delivery", "Returns"],
-  },
-  {
-    key: "best-hydration",
-    category: "product",
-    prompts: ["best product for hydration", "which product for hydration"],
-    response: "Fast&Up Reload helps you stay hydrated and active for longer.",
-    quickReplies: PRODUCT_QUICK_REPLIES,
-  },
-  {
-    key: "best-energy",
-    category: "product",
-    prompts: ["best product for energy", "which product for energy"],
-    response: "Activate Pre-Workout boosts workout energy and focus.",
-    quickReplies: PRODUCT_QUICK_REPLIES,
-  },
-  {
-    key: "best-recovery",
-    category: "product",
-    prompts: ["best product for recovery", "which product for recovery"],
-    response: "Recover BCAA + Glutamine supports faster recovery and less soreness.",
-    quickReplies: PRODUCT_QUICK_REPLIES,
-  },
-  {
-    key: "best-muscle",
-    category: "product",
-    prompts: ["best product for muscle gain", "which product for muscle gain"],
-    response: "Fast&Up Whey Protein supports lean muscle gain and strength recovery.",
-    quickReplies: PRODUCT_QUICK_REPLIES,
-  },
-  {
-    key: "best-immunity",
-    category: "product",
-    prompts: ["best product for immunity", "which product for immunity"],
-    response: "Fast&Up Vitamin C supports strong daily immunity.",
-    quickReplies: PRODUCT_QUICK_REPLIES,
-  },
-  {
-    key: "best-skin",
-    category: "product",
-    prompts: ["best product for skin glow", "which product for skin"],
-    response: "Collagen Glow supports skin hydration, hair strength, and daily glow.",
-    quickReplies: PRODUCT_QUICK_REPLIES,
-  },
-  {
-    key: "usage-tablet",
-    category: "usage",
-    prompts: ["how to use effervescent tablets", "how to use tablet"],
-    response: "Drop one tablet in water, wait for fizz to settle, then drink.",
-    quickReplies: ["Water quantity", "Best time", "Daily use", "Next question"],
-  },
-  {
-    key: "usage-water",
-    category: "usage",
-    prompts: ["how much water for one tablet", "tablet in how much water"],
-    response: "Use around 250 ml water unless the pack says otherwise.",
-    quickReplies: ["Before workout", "During workout", "After workout", "Daily use"],
-  },
-  {
-    key: "usage-swallow",
-    category: "usage",
-    prompts: ["can i swallow tablet directly", "can i eat tablet directly"],
-    response: "No. Always dissolve the tablet fully in water before drinking.",
-    quickReplies: ["How to use", "Water quantity", "Best time", "Other question"],
-  },
-  {
-    key: "usage-before-workout",
-    category: "usage",
-    prompts: ["what to take before workout", "pre workout recommendation"],
-    response: "Activate Pre-Workout helps improve energy and focus before exercise.",
-    quickReplies: PRODUCT_QUICK_REPLIES,
-  },
-  {
-    key: "usage-during-workout",
-    category: "usage",
-    prompts: ["what to take during workout", "during workout supplement"],
-    response: "Fast&Up Reload helps maintain hydration and energy during workouts.",
-    quickReplies: PRODUCT_QUICK_REPLIES,
-  },
-  {
-    key: "usage-after-workout",
-    category: "usage",
-    prompts: ["what to take after workout", "post workout supplement"],
-    response: "Recover BCAA + Glutamine helps reduce soreness after workouts.",
-    quickReplies: PRODUCT_QUICK_REPLIES,
-  },
-  {
-    key: "usage-multiple",
-    category: "usage",
-    prompts: [
-      "can i take multiple fastup products in one day",
-      "can i use multiple products",
-    ],
-    response: "Yes, if you follow each serving guide and avoid excess intake.",
-    quickReplies: ["Daily use", "Serving size", "Safety", "Other question"],
-  },
-  {
-    key: "usage-results",
-    category: "usage",
-    prompts: ["when will i see results", "how fast does it work"],
-    response: "Most users notice benefits in 1-2 weeks with regular use.",
-    quickReplies: ["Best product", "How to use", "Daily use", "Other question"],
-  },
-  {
-    key: "order-track",
-    category: "orders",
-    prompts: ["track my order", "where is my order"],
-    response: "Please share your order ID, and I will guide the tracking steps.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "order-cancel",
-    category: "orders",
-    prompts: ["how to cancel order", "cancel my order"],
-    response: "You can request cancellation before dispatch through support.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "order-address",
-    category: "orders",
-    prompts: ["can i change delivery address", "change my delivery address"],
-    response: "Address changes are possible before dispatch. Please contact support quickly.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "order-delay",
-    category: "orders",
-    prompts: ["my order is delayed", "order taking too long"],
-    response: "Sorry for the delay. Please share your order ID for an updated status.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "order-damaged",
-    category: "orders",
-    prompts: ["received damaged product", "product arrived damaged"],
-    response: "Please share package and product photos for quick replacement support.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "order-wrong",
-    category: "orders",
-    prompts: ["received wrong product", "wrong item delivered"],
-    response: "Sorry for this. Please share order details and product photo for support.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "order-partial",
-    category: "orders",
-    prompts: ["received partial order", "missing item in order"],
-    response: "Please share your order ID and missing item details for quick help.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "order-refund-status",
-    category: "orders",
-    prompts: ["check my refund status", "refund tracking"],
-    response: "Please share your order ID to check the current refund stage.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "delivery-time",
-    category: "delivery",
-    prompts: ["how long does delivery take", "delivery timeline"],
-    response: "Metro delivery is usually 2-4 days and other locations 4-7 business days.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "delivery-pincode",
-    category: "delivery",
-    prompts: ["do you deliver to my pincode", "delivery availability for pincode"],
-    response: "Please share your pincode, and support can confirm availability.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "delivery-express",
-    category: "delivery",
-    prompts: ["is express delivery available", "same day delivery available"],
-    response: "Express delivery depends on location and current serviceability.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "return-policy",
-    category: "returns",
-    prompts: ["what is your return policy", "can i return product"],
-    response: "Unopened products are usually returnable within 7 days after delivery.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "return-opened",
-    category: "returns",
-    prompts: ["can i return opened product", "opened product return"],
-    response: "Opened consumables are usually not returnable unless damaged or incorrect.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "return-request",
-    category: "returns",
-    prompts: ["how to request return", "raise return request"],
-    response: "Share order ID and issue details with support to start return process.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "refund-time",
-    category: "returns",
-    prompts: ["when will i get refund", "refund processing time"],
-    response: "Approved refunds are usually initiated within 3-5 business days.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "pricing-offers",
-    category: "pricing",
-    prompts: ["do you have discount", "what offers are live today"],
-    response: "Offers change regularly. Please check the latest deal at checkout.",
-    quickReplies: ["Current offers", "Coupon code", "Bundle savings", "Other question"],
-  },
-  {
-    key: "pricing-coupon",
-    category: "pricing",
-    prompts: ["how to apply coupon", "coupon not working"],
-    response: "Enter your code at checkout and check code validity and expiry.",
-    quickReplies: ["Current offers", "Checkout help", "Talk to support", "Other question"],
-  },
-  {
-    key: "pricing-cod",
-    category: "pricing",
-    prompts: ["is cash on delivery available", "cod available"],
-    response: "COD availability depends on your delivery location and order value.",
-    quickReplies: ORDER_QUICK_REPLIES,
-  },
-  {
-    key: "pricing-payment",
-    category: "pricing",
-    prompts: ["what payment methods are available", "how can i pay"],
-    response: "You can usually pay using prepaid methods and COD where available.",
-    quickReplies: ["COD available", "Order help", "Checkout help", "Other question"],
-  },
-  {
-    key: "health-pregnancy",
-    category: "health",
-    prompts: [
-      "can i use fastup during pregnancy",
-      "can i use fastup while breastfeeding",
-    ],
-    response: "Please consult your doctor before using supplements during this phase.",
-    quickReplies: ["Ingredients", "Daily use", "Talk to support", "Other question"],
-  },
-  {
-    key: "health-condition",
-    category: "health",
-    prompts: [
-      "i have a medical condition can i use fastup",
-      "can i take fastup with medicines",
-    ],
-    response: "Please consult your doctor before starting supplements with medicines or conditions.",
-    quickReplies: ["Ingredients", "Safety", "Talk to support", "Other question"],
-  },
-  {
-    key: "support-human",
-    category: "support",
-    prompts: ["connect me to human agent", "talk to support agent"],
-    response: "Sure. Please share issue type and order ID for priority support.",
-    quickReplies: ["Order issue", "Delivery issue", "Refund issue", "Product issue"],
-  },
-  {
-    key: "support-contact",
-    category: "support",
-    prompts: ["how can i contact support", "customer care help"],
-    response: "Please share your query type and order ID if available for faster support.",
-    quickReplies: ["Order help", "Delivery help", "Return help", "Product help"],
-  },
-  {
-    key: "support-thanks",
-    category: "support",
-    prompts: ["thank you", "thanks"],
-    response: "You're welcome. Happy to help with your next Fast&Up question.",
-    quickReplies: DEFAULT_QUICK_REPLIES,
-  },
-];
-
-function buildProductIntents(): RuleIntent[] {
-  const intents: RuleIntent[] = [];
-
-  for (const profile of PRODUCT_PROFILES) {
-    for (const template of PRODUCT_TEMPLATES) {
-      intents.push({
-        id: `product-${profile.key}-${template.key}`,
-        category: "product",
-        trigger: template.trigger(profile),
-        response: template.response(profile),
-        quickReplies: PRODUCT_QUICK_REPLIES,
-      });
-    }
-  }
-
-  return intents;
+function intent(
+  id: string,
+  category: IntentCategory,
+  triggers: string[],
+  response: string,
+  priority = 1
+): IntentDefinition {
+  return { id, category, triggers, response, priority };
 }
 
-function buildSupportIntents(): RuleIntent[] {
-  const intents: RuleIntent[] = [];
+const greetingIntents: IntentDefinition[] = [
+  intent("greeting_1", "greeting", ["hi", "hello"], "Hello! How can I help you today?", 9),
+  intent("greeting_2", "greeting", ["hey"], "Hey! How can I assist you?", 9),
+  intent("greeting_3", "greeting", ["namaste"], "Namaste! How can I help you today?", 9),
+  intent(
+    "greeting_4",
+    "greeting",
+    ["good morning"],
+    "Good morning! How can I help you?",
+    9
+  ),
+  intent(
+    "greeting_5",
+    "greeting",
+    ["good evening"],
+    "Good evening! How can I assist you?",
+    9
+  ),
+  intent(
+    "greeting_6",
+    "greeting",
+    ["good afternoon"],
+    "Good afternoon! What can I do for you?",
+    9
+  ),
+  intent(
+    "greeting_7",
+    "greeting",
+    ["hello rahul"],
+    "Hello! Rahul here from Fast&Up. How can I help?",
+    9
+  ),
+  intent(
+    "greeting_8",
+    "greeting",
+    ["hi fastandup", "hi fast and up"],
+    "Hi! How can I assist you today?",
+    9
+  ),
+  intent(
+    "greeting_9",
+    "greeting",
+    ["start"],
+    "Namaste! I am Rahul from Fast&Up. How can I help you?",
+    9
+  ),
+  intent(
+    "greeting_10",
+    "greeting",
+    ["help"],
+    "You can ask about products, usage, orders, or offers.",
+    3
+  ),
+];
 
-  for (const topic of SUPPORT_TOPICS) {
-    for (let index = 0; index < topic.prompts.length; index += 1) {
-      intents.push({
-        id: `support-${topic.key}-${index + 1}`,
-        category: topic.category,
-        trigger: topic.prompts[index],
-        response: topic.response,
-        quickReplies: topic.quickReplies,
-      });
-    }
-  }
+const baseBenefitIntents: IntentDefinition[] = [
+  intent(
+    "benefit_1",
+    "benefits",
+    ["product benefits"],
+    "Fast&Up products boost hydration, energy, and performance.",
+    8
+  ),
+  intent(
+    "benefit_2",
+    "benefits",
+    ["why use fastandup", "why use fast and up"],
+    "It helps you stay active, hydrated, and energized.",
+    8
+  ),
+  intent(
+    "benefit_3",
+    "benefits",
+    ["advantages"],
+    "Faster absorption and better performance support.",
+    7
+  ),
+  intent(
+    "benefit_4",
+    "benefits",
+    ["what does it do"],
+    "It supports energy, hydration, and recovery.",
+    7
+  ),
+  intent(
+    "benefit_5",
+    "benefits",
+    ["hydration benefits"],
+    "Helps maintain fluid balance and prevent fatigue.",
+    8
+  ),
+  intent("benefit_6", "benefits", ["energy boost"], "Provides quick energy during workouts.", 8),
+  intent("benefit_7", "benefits", ["performance"], "Improves stamina and endurance.", 6),
+  intent(
+    "benefit_8",
+    "benefits",
+    ["fitness benefits"],
+    "Supports workout performance and recovery.",
+    8
+  ),
+  intent(
+    "benefit_9",
+    "benefits",
+    ["daily use benefits"],
+    "Keeps you active and refreshed daily.",
+    8
+  ),
+  intent(
+    "benefit_10",
+    "benefits",
+    ["electrolyte benefits"],
+    "Replenishes lost salts and minerals.",
+    8
+  ),
+];
 
-  return intents;
-}
+const benefitTopics = [
+  {
+    suffix: "11",
+    triggers: ["immunity benefits", "immunity support"],
+    response: "Supports daily immunity and wellness.",
+  },
+  {
+    suffix: "12",
+    triggers: ["recovery benefits", "post workout recovery"],
+    response: "Helps your body recover faster after workouts.",
+  },
+  {
+    suffix: "13",
+    triggers: ["stamina benefits", "stamina support"],
+    response: "Improves stamina for longer activity.",
+  },
+  {
+    suffix: "14",
+    triggers: ["endurance benefits", "endurance support"],
+    response: "Supports endurance during training.",
+  },
+  {
+    suffix: "15",
+    triggers: ["muscle recovery benefits", "muscle support benefits"],
+    response: "Supports muscle recovery and strength.",
+  },
+  {
+    suffix: "16",
+    triggers: ["anti fatigue benefits", "fatigue support"],
+    response: "Helps reduce workout fatigue.",
+  },
+  {
+    suffix: "17",
+    triggers: ["cramp prevention benefits", "avoid cramps"],
+    response: "Supports electrolyte balance to reduce cramps.",
+  },
+  {
+    suffix: "18",
+    triggers: ["summer hydration benefits", "hot weather hydration"],
+    response: "Keeps you hydrated in heat and active days.",
+  },
+  {
+    suffix: "19",
+    triggers: ["running benefits", "benefits for runners"],
+    response: "Supports hydration and endurance for runners.",
+  },
+  {
+    suffix: "20",
+    triggers: ["gym benefits", "benefits for gym"],
+    response: "Supports energy and recovery for gym sessions.",
+  },
+  {
+    suffix: "21",
+    triggers: ["sports benefits", "benefits for sports"],
+    response: "Supports performance across sports activities.",
+  },
+  {
+    suffix: "22",
+    triggers: ["active lifestyle benefits", "lifestyle benefits"],
+    response: "Keeps you refreshed and active through the day.",
+  },
+  {
+    suffix: "23",
+    triggers: ["focus benefits", "focus support"],
+    response: "Supports focus and workout readiness.",
+  },
+  {
+    suffix: "24",
+    triggers: ["strength benefits", "strength support"],
+    response: "Supports strength performance with better recovery.",
+  },
+  {
+    suffix: "25",
+    triggers: ["daily hydration support", "hydration support"],
+    response: "Supports daily hydration and electrolyte balance.",
+  },
+  {
+    suffix: "26",
+    triggers: ["wellness benefits", "general wellness"],
+    response: "Supports overall wellness and active living.",
+  },
+  {
+    suffix: "27",
+    triggers: ["long workout benefits", "long session support"],
+    response: "Helps maintain energy during long sessions.",
+  },
+  {
+    suffix: "28",
+    triggers: ["travel hydration", "travel benefits"],
+    response: "Supports hydration during travel and busy days.",
+  },
+  {
+    suffix: "29",
+    triggers: ["quick hydration", "instant hydration support"],
+    response: "Provides fast hydration support when needed.",
+  },
+  {
+    suffix: "30",
+    triggers: ["all benefits", "overall benefits"],
+    response: "Fast&Up supports hydration, energy, recovery, and endurance.",
+  },
+];
 
-export const RULE_BASE: RuleIntent[] = [...buildProductIntents(), ...buildSupportIntents()];
+const extendedBenefitIntents: IntentDefinition[] = benefitTopics.map((topic) =>
+  intent(
+    `benefit_${topic.suffix}`,
+    "benefits",
+    topic.triggers,
+    topic.response,
+    7
+  )
+);
+
+const baseUsageIntents: IntentDefinition[] = [
+  intent(
+    "usage_1",
+    "usage",
+    ["how to use"],
+    "Drop one tablet in water, let it dissolve, and drink.",
+    8
+  ),
+  intent(
+    "usage_2",
+    "usage",
+    ["how to take"],
+    "Mix in water and consume once dissolved.",
+    8
+  ),
+  intent(
+    "usage_3",
+    "usage",
+    ["directions"],
+    "Add tablet to water and drink after dissolving.",
+    8
+  ),
+  intent(
+    "usage_4",
+    "usage",
+    ["when to take"],
+    "Best before, during, or after workouts.",
+    8
+  ),
+  intent("usage_5", "usage", ["daily usage"], "You can take it daily as per need.", 8),
+  intent("usage_6", "usage", ["tablet use"], "Dissolve in water and drink.", 8),
+  intent("usage_7", "usage", ["water quantity"], "Use one glass of water per tablet.", 8),
+  intent(
+    "usage_8",
+    "usage",
+    ["before workout"],
+    "Yes, it helps boost energy before workouts.",
+    8
+  ),
+  intent(
+    "usage_9",
+    "usage",
+    ["after workout"],
+    "Great for recovery after workouts.",
+    8
+  ),
+  intent("usage_10", "usage", ["how many tablets"], "Usually 1-2 tablets per day.", 8),
+];
+
+const usageTopics = [
+  ["usage_11", ["can i use twice a day", "two times usage"], "Use as per label guidance."],
+  ["usage_12", ["empty stomach", "before food"], "You can use as directed, usually with water."],
+  ["usage_13", ["after food", "with meal"], "Daily nutrition variants are usually fine after meals."],
+  ["usage_14", ["night usage", "can i take at night"], "Use based on need and product type."],
+  ["usage_15", ["morning usage", "take in morning"], "Morning use is fine for daily hydration support."],
+  ["usage_16", ["during running", "use while running"], "Yes, it supports hydration during runs."],
+  ["usage_17", ["during cycling", "use while cycling"], "Yes, it helps maintain endurance hydration."],
+  ["usage_18", ["can kids use", "usage for kids"], "Use only age-appropriate variants with guidance."],
+  ["usage_19", ["can women use", "usage for women"], "Yes, women can use suitable Fast&Up variants."],
+  ["usage_20", ["can men use", "usage for men"], "Yes, men can use as per label instructions."],
+  ["usage_21", ["how long to use", "usage duration"], "You can use regularly based on your activity needs."],
+  ["usage_22", ["missed dose", "forgot to take"], "Take next planned serving. Do not double dose."],
+  ["usage_23", ["can i mix with juice", "mix with drink"], "For best results, dissolve in plain water."],
+  ["usage_24", ["can i swallow tablet", "swallow directly"], "No, dissolve fully in water before drinking."],
+  ["usage_25", ["take with protein", "use with whey"], "Yes, you can use with your workout nutrition routine."],
+  ["usage_26", ["use in summer", "summer usage"], "Yes, it is helpful for hydration in hot weather."],
+  ["usage_27", ["use in winter", "winter usage"], "Yes, use based on hydration and activity needs."],
+  ["usage_28", ["travel use", "carry while travel"], "Yes, it is convenient for hydration while traveling."],
+  ["usage_29", ["workout timing", "best timing workout"], "Use before, during, or after workouts as needed."],
+  ["usage_30", ["usage tips", "how to use properly"], "Use correct water quantity and follow label guidance."],
+] as const;
+
+const extendedUsageIntents: IntentDefinition[] = usageTopics.map((item) =>
+  intent(item[0], "usage", [...item[1]], item[2], 7)
+);
+
+const baseIngredientIntents: IntentDefinition[] = [
+  intent(
+    "ingredient_1",
+    "ingredients",
+    ["ingredients"],
+    "Contains electrolytes, vitamins, and essential nutrients.",
+    8
+  ),
+  intent(
+    "ingredient_2",
+    "ingredients",
+    ["what inside"],
+    "Includes minerals and hydration salts.",
+    8
+  ),
+  intent(
+    "ingredient_3",
+    "ingredients",
+    ["vitamins"],
+    "Rich in essential vitamins for energy.",
+    8
+  ),
+  intent(
+    "ingredient_4",
+    "ingredients",
+    ["electrolytes"],
+    "Helps maintain hydration balance.",
+    8
+  ),
+  intent(
+    "ingredient_5",
+    "ingredients",
+    ["sugar content"],
+    "Low sugar or sugar-free variants available.",
+    8
+  ),
+];
+
+const ingredientTopics = [
+  ["ingredient_6", ["minerals"], "Contains important hydration minerals."],
+  ["ingredient_7", ["contains caffeine"], "Some performance variants may include caffeine."],
+  ["ingredient_8", ["contains zinc"], "Some wellness variants include zinc support."],
+  ["ingredient_9", ["contains vitamin c"], "Some immunity variants include vitamin C."],
+  ["ingredient_10", ["contains sodium"], "Electrolyte variants may include sodium support."],
+  ["ingredient_11", ["contains potassium"], "Electrolyte variants may include potassium support."],
+  ["ingredient_12", ["contains magnesium"], "Electrolyte variants may include magnesium support."],
+  ["ingredient_13", ["artificial color"], "Please check pack label for additive details."],
+  ["ingredient_14", ["preservatives"], "Please check product label for preservative details."],
+  ["ingredient_15", ["gluten free"], "Please check label for gluten-related details."],
+  ["ingredient_16", ["lactose free"], "Plant-based variants are generally dairy-free."],
+  ["ingredient_17", ["vegan ingredients"], "Vegan variants are available in select products."],
+  ["ingredient_18", ["allergen info"], "Please check label allergen information before use."],
+  ["ingredient_19", ["protein content"], "Protein variants provide high-quality protein support."],
+  ["ingredient_20", ["nutrition facts"], "Nutrition facts are available on each product pack."],
+] as const;
+
+const extendedIngredientIntents: IntentDefinition[] = ingredientTopics.map((item) =>
+  intent(item[0], "ingredients", [...item[1]], item[2], 7)
+);
+
+const baseOrderIntents: IntentDefinition[] = [
+  intent(
+    "order_1",
+    "orders",
+    ["track order"],
+    "Please share your order ID to track your order.",
+    10
+  ),
+  intent(
+    "order_2",
+    "orders",
+    ["order status"],
+    "Share your order ID for status updates.",
+    10
+  ),
+  intent(
+    "order_3",
+    "orders",
+    ["where is my order"],
+    "I can help track it. Please provide order ID.",
+    10
+  ),
+  intent(
+    "order_4",
+    "orders",
+    ["cancel order"],
+    "Orders can be canceled before dispatch.",
+    9
+  ),
+  intent("order_5", "orders", ["change order"], "Changes allowed before shipping.", 9),
+  intent(
+    "order_6",
+    "orders",
+    ["order delay"],
+    "Delivery may take 3-5 working days.",
+    9
+  ),
+  intent(
+    "order_7",
+    "orders",
+    ["order confirmation"],
+    "You’ll receive confirmation via SMS/email.",
+    9
+  ),
+  intent(
+    "order_8",
+    "orders",
+    ["order not received"],
+    "Please share order ID for help.",
+    10
+  ),
+  intent(
+    "order_9",
+    "orders",
+    ["track shipment"],
+    "Tracking link will be shared after dispatch.",
+    9
+  ),
+  intent(
+    "order_10",
+    "orders",
+    ["delivery status"],
+    "Check status using your order ID.",
+    10
+  ),
+];
+
+const orderTopics = [
+  ["order_11", ["dispatch status"], "Please share order ID for dispatch updates."],
+  ["order_12", ["payment failed"], "Please retry payment or check with your payment provider."],
+  ["order_13", ["amount deducted"], "Please share transaction details for support."],
+  ["order_14", ["invoice"], "Invoice can be shared after order confirmation."],
+  ["order_15", ["cod order"], "COD is available in eligible locations."],
+  ["order_16", ["change address"], "Address changes are possible before dispatch."],
+  ["order_17", ["change phone"], "Phone updates are possible before dispatch."],
+  ["order_18", ["multiple orders"], "Please share each order ID for tracking support."],
+  ["order_19", ["order id missing"], "Please check SMS/email confirmation for order ID."],
+  ["order_20", ["order issue"], "Please share order ID and issue details for quick help."],
+  ["order_21", ["gift order"], "You can ship to another address during checkout."],
+  ["order_22", ["partial order"], "Please share missing item details with order ID."],
+  ["order_23", ["wrong order"], "Please share order ID for replacement support."],
+  ["order_24", ["damaged order"], "Please report with photos within 48 hours."],
+  ["order_25", ["cancel after shipping"], "Cancellation after shipping is usually not possible."],
+  ["order_26", ["edit after shipping"], "Edits are usually not possible after shipping."],
+  ["order_27", ["order pending"], "Please share order ID to check pending status."],
+  ["order_28", ["order processing"], "Your order is under processing before dispatch."],
+  ["order_29", ["resend confirmation"], "Please check spam or share details for support."],
+  ["order_30", ["order support"], "Please share order ID for order-specific support."],
+] as const;
+
+const extendedOrderIntents: IntentDefinition[] = orderTopics.map((item) =>
+  intent(item[0], "orders", [...item[1]], item[2], 8)
+);
+
+const baseOfferIntents: IntentDefinition[] = [
+  intent("offer_1", "offers", ["offers"], "Check our website for latest offers.", 9),
+  intent("offer_2", "offers", ["discount"], "We have regular discounts online.", 9),
+  intent("offer_3", "offers", ["coupon"], "Apply coupon at checkout for savings.", 9),
+  intent("offer_4", "offers", ["price"], "Prices vary by product. Visit website.", 8),
+  intent("offer_5", "offers", ["cheap"], "We offer value packs for savings.", 8),
+  intent("offer_6", "offers", ["combo"], "Combo packs available for better value.", 8),
+  intent("offer_7", "offers", ["sale"], "Keep checking for seasonal sales.", 8),
+  intent("offer_8", "offers", ["cashback"], "Cashback offers may be available.", 8),
+  intent("offer_9", "offers", ["deal"], "Check deals section on website.", 8),
+  intent("offer_10", "offers", ["best price"], "Online store gives best pricing.", 8),
+];
+
+const offerTopics = [
+  ["offer_11", ["promo code"], "Apply promo code at checkout for savings."],
+  ["offer_12", ["coupon code"], "Use valid coupon code before payment."],
+  ["offer_13", ["offer today"], "Please check website banners for live offers."],
+  ["offer_14", ["weekend offer"], "Weekend offers may be available online."],
+  ["offer_15", ["festive offer"], "Festive offers are announced on website."],
+  ["offer_16", ["new user offer"], "New user offers may be available online."],
+  ["offer_17", ["bundle price"], "Bundles often provide better value pricing."],
+  ["offer_18", ["bulk discount"], "Bulk purchases may have additional savings."],
+  ["offer_19", ["subscription discount"], "Subscription savings may be available."],
+  ["offer_20", ["minimum order offer"], "Some offers require minimum cart value."],
+  ["offer_21", ["free gift"], "Free gifts may apply on selected campaigns."],
+  ["offer_22", ["referral offer"], "Referral benefits may be available online."],
+  ["offer_23", ["student discount"], "Please check latest eligibility offers online."],
+  ["offer_24", ["first order discount"], "First-order discounts may be available."],
+  ["offer_25", ["checkout offer"], "Checkout may show your eligible offers."],
+  ["offer_26", ["app offer"], "App-specific offers may be available sometimes."],
+  ["offer_27", ["payment offer"], "Payment partner offers may apply at checkout."],
+  ["offer_28", ["limited deal"], "Limited-time deals are updated regularly."],
+  ["offer_29", ["combo savings"], "Combo packs are great for better savings."],
+  ["offer_30", ["offer details"], "Visit website for complete offer details."],
+] as const;
+
+const extendedOfferIntents: IntentDefinition[] = offerTopics.map((item) =>
+  intent(item[0], "offers", [...item[1]], item[2], 8)
+);
+
+const baseDeliveryIntents: IntentDefinition[] = [
+  intent(
+    "delivery_1",
+    "delivery",
+    ["delivery time"],
+    "Delivery takes 3-5 working days.",
+    9
+  ),
+  intent("delivery_2", "delivery", ["shipping"], "We deliver across India.", 9),
+  intent(
+    "delivery_3",
+    "delivery",
+    ["return policy"],
+    "Returns accepted as per policy.",
+    9
+  ),
+  intent("delivery_4", "delivery", ["refund"], "Refund processed after approval.", 9),
+  intent(
+    "delivery_5",
+    "delivery",
+    ["damaged product"],
+    "Please report within 48 hours.",
+    9
+  ),
+  intent(
+    "delivery_6",
+    "delivery",
+    ["late delivery"],
+    "Delays may happen due to logistics.",
+    8
+  ),
+  intent(
+    "delivery_7",
+    "delivery",
+    ["shipping cost"],
+    "Shipping may be free on offers.",
+    8
+  ),
+  intent(
+    "delivery_8",
+    "delivery",
+    ["replace product"],
+    "Replacement available if eligible.",
+    8
+  ),
+  intent(
+    "delivery_9",
+    "delivery",
+    ["wrong product"],
+    "We’ll arrange replacement quickly.",
+    9
+  ),
+  intent(
+    "delivery_10",
+    "delivery",
+    ["return time"],
+    "Returns allowed within policy period.",
+    8
+  ),
+];
+
+const deliveryTopics = [
+  ["delivery_11", ["international shipping"], "Please check support for international availability."],
+  ["delivery_12", ["pincode service"], "Please share your pincode for delivery availability."],
+  ["delivery_13", ["same day delivery"], "Same-day delivery depends on location."],
+  ["delivery_14", ["express shipping"], "Express shipping is available in selected areas."],
+  ["delivery_15", ["weekend delivery"], "Weekend delivery depends on courier service."],
+  ["delivery_16", ["missed delivery"], "Please contact courier for redelivery options."],
+  ["delivery_17", ["delivery reschedule"], "Rescheduling depends on courier availability."],
+  ["delivery_18", ["return pickup"], "Pickup is available where serviceable."],
+  ["delivery_19", ["refund time"], "Refunds are processed after return verification."],
+  ["delivery_20", ["refund source"], "Refund goes to original payment method."],
+  ["delivery_21", ["shipment hold"], "Please contact support for shipment hold requests."],
+  ["delivery_22", ["delivery address change"], "Address change is possible before dispatch."],
+  ["delivery_23", ["replacement time"], "Replacement is processed as per policy timeline."],
+  ["delivery_24", ["return charges"], "Return charges depend on policy and case type."],
+  ["delivery_25", ["shipping partner"], "Courier partner is assigned after dispatch."],
+  ["delivery_26", ["delivered but not received"], "Please report quickly with order details."],
+  ["delivery_27", ["dispatch date"], "Dispatch timing depends on order confirmation."],
+  ["delivery_28", ["delivery attempts"], "Courier may reattempt delivery based on policy."],
+  ["delivery_29", ["shipping update"], "Please use tracking updates after dispatch."],
+  ["delivery_30", ["delivery help"], "Share order ID for delivery-related support."],
+] as const;
+
+const extendedDeliveryIntents: IntentDefinition[] = deliveryTopics.map((item) =>
+  intent(item[0], "delivery", [...item[1]], item[2], 8)
+);
+
+const baseFallbackIntents: IntentDefinition[] = [
+  intent("fallback_1", "fallback", ["unknown"], "Sorry, I didn’t understand. Please rephrase.", 5),
+  intent(
+    "fallback_2",
+    "fallback",
+    ["random"],
+    "I can help with products, orders, or offers.",
+    5
+  ),
+  intent("fallback_3", "fallback", ["nonsense"], "Please ask a valid question.", 5),
+  intent(
+    "fallback_4",
+    "fallback",
+    ["unclear"],
+    "Could you please clarify your question?",
+    5
+  ),
+  intent(
+    "fallback_5",
+    "fallback",
+    ["???"],
+    "I didn’t get that. Try asking differently.",
+    5
+  ),
+];
+
+const fallbackTopics = [
+  ["fallback_6", ["asdf", "qwerty"], "Please ask a valid Fast&Up question."],
+  ["fallback_7", ["blah blah"], "Please ask about products, usage, orders, or offers."],
+  ["fallback_8", ["dont know"], "Please ask clearly and I will help quickly."],
+  ["fallback_9", ["no idea"], "Please rephrase and ask a specific question."],
+  ["fallback_10", ["what"], "Please share your full question for better help."],
+  ["fallback_11", ["hmm"], "Could you please clarify your question?"],
+  ["fallback_12", ["ok"], "You can ask about products, usage, orders, or offers."],
+  ["fallback_13", ["test"], "Please ask a valid Fast&Up query."],
+  ["fallback_14", ["invalid"], "Please rephrase with product, order, or offer details."],
+  ["fallback_15", ["nothing"], "Please ask your Fast&Up question and I will help."],
+  ["fallback_16", ["skip"], "Please ask about products, usage, orders, or offers."],
+  ["fallback_17", ["later"], "Sure. Ask anytime about products, usage, orders, or offers."],
+  ["fallback_18", ["idk"], "Please rephrase your question in simple words."],
+  ["fallback_19", ["??"], "I didn’t get that. Please ask again clearly."],
+  ["fallback_20", ["help topics"], "You can ask about products, usage, orders, or offers."],
+] as const;
+
+const extendedFallbackIntents: IntentDefinition[] = fallbackTopics.map((item) =>
+  intent(item[0], "fallback", [...item[1]], item[2], 4)
+);
+
+const INTENTS: IntentDefinition[] = [
+  ...greetingIntents,
+  ...baseBenefitIntents,
+  ...extendedBenefitIntents,
+  ...baseUsageIntents,
+  ...extendedUsageIntents,
+  ...baseIngredientIntents,
+  ...extendedIngredientIntents,
+  ...baseOrderIntents,
+  ...extendedOrderIntents,
+  ...baseOfferIntents,
+  ...extendedOfferIntents,
+  ...baseDeliveryIntents,
+  ...extendedDeliveryIntents,
+  ...baseFallbackIntents,
+  ...extendedFallbackIntents,
+];
 
 function normalizeText(value: string) {
   return value
     .toLowerCase()
-    .replace(/&/g, " and ")
+    .replace(/fast\s*&\s*up/g, "fastandup")
+    .replace(/fast\s+and\s+up/g, "fastandup")
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function textToTokens(text: string) {
+  return normalizeText(text).split(" ").filter(Boolean);
+}
+
+function withOptionsLine(answer: string) {
+  return `${answer}\n${OPTIONS_LINE}`;
 }
 
 function isUnclearInput(message: string) {
   const normalized = normalizeText(message);
   if (!normalized) return true;
 
-  const words = normalized.split(" ").filter(Boolean);
-  if (words.length === 0) return true;
+  const weakInputs = new Set(["h", "ha", "hmm", "umm", "ok", "yo"]);
+  if (weakInputs.has(normalized)) return true;
 
-  const weakWords = new Set(["hmm", "ok", "h", "hii", "yo", "test"]);
-
-  if (words.length === 1 && weakWords.has(words[0])) return true;
-  if (words.length === 1 && words[0].length <= 2) return true;
-
-  return false;
+  return normalized.length <= 1;
 }
 
-function findIntent(message: string) {
+type ScoredIntent = {
+  intent: IntentDefinition;
+  score: number;
+};
+
+function getScoreByTrigger(message: string, trigger: string) {
   const normalizedMessage = normalizeText(message);
+  const normalizedTrigger = normalizeText(trigger);
 
-  for (const intent of RULE_BASE) {
-    const normalizedTrigger = normalizeText(intent.trigger);
+  if (!normalizedMessage || !normalizedTrigger) return 0;
+  if (normalizedMessage === normalizedTrigger) return 120;
 
-    if (normalizedMessage === normalizedTrigger) {
-      return intent;
+  const messageTokens = textToTokens(normalizedMessage);
+  const triggerTokens = textToTokens(normalizedTrigger);
+  if (triggerTokens.length === 0) return 0;
+
+  if (triggerTokens.length === 1) {
+    return messageTokens.includes(triggerTokens[0]) ? 100 : 0;
+  }
+
+  const compactMessage = normalizedMessage.replace(/\s+/g, "");
+  const compactTrigger = normalizedTrigger.replace(/\s+/g, "");
+
+  if (compactMessage === compactTrigger) return 115;
+  if (normalizedMessage.includes(normalizedTrigger)) return 100;
+  if (compactMessage.includes(compactTrigger)) return 95;
+
+  const overlapCount = triggerTokens.filter((token) => messageTokens.includes(token)).length;
+  const coverage = overlapCount / triggerTokens.length;
+
+  if (
+    messageTokens.length >= 2 &&
+    messageTokens.every((token) => triggerTokens.includes(token))
+  ) {
+    return 72;
+  }
+
+  if (coverage === 1) return 92;
+  if (coverage >= 0.75) return 85;
+  if (coverage >= 0.6 && triggerTokens.length >= 2) return 78;
+  if (coverage >= 0.5 && triggerTokens.length >= 3) return 70;
+
+  return 0;
+}
+
+function findIntent(message: string): IntentDefinition | null {
+  const candidates: ScoredIntent[] = [];
+
+  for (const intentDef of INTENTS) {
+    let bestTriggerScore = 0;
+
+    for (const trigger of intentDef.triggers) {
+      const score = getScoreByTrigger(message, trigger);
+      if (score > bestTriggerScore) bestTriggerScore = score;
     }
 
-    if (normalizedTrigger.length >= 8 && normalizedMessage.includes(normalizedTrigger)) {
-      return intent;
+    if (bestTriggerScore > 0) {
+      candidates.push({
+        intent: intentDef,
+        score: bestTriggerScore + intentDef.priority,
+      });
     }
   }
 
-  return null;
+  if (candidates.length === 0) return null;
+  candidates.sort((a, b) => b.score - a.score);
+  return candidates[0].intent;
 }
 
 export function getRuleBasedReply(message: string): RuleAgentResult {
-  if (isUnclearInput(message)) {
+  const matchedIntent = findIntent(message);
+
+  if (matchedIntent) {
     return {
-      mode: "clarify",
-      message: CLARIFY_MESSAGE,
-      quickReplies: DEFAULT_QUICK_REPLIES,
+      mode: "matched",
+      message: withOptionsLine(matchedIntent.response),
+      quickReplies: QUICK_REPLIES,
+      matchedIntentId: matchedIntent.id,
     };
   }
 
-  const intent = findIntent(message);
-
-  if (!intent) {
+  if (isUnclearInput(message)) {
     return {
-      mode: "fallback",
-      message: FALLBACK_MESSAGE,
-      quickReplies: DEFAULT_QUICK_REPLIES,
+      mode: "clarify",
+      message: withOptionsLine(CLARIFY_MESSAGE),
+      quickReplies: QUICK_REPLIES,
     };
   }
 
   return {
-    mode: "matched",
-    message: intent.response,
-    quickReplies: intent.quickReplies,
-    matchedIntentId: intent.id,
-    matchedTrigger: intent.trigger,
+    mode: "fallback",
+    message: withOptionsLine(FALLBACK_MESSAGE),
+    quickReplies: QUICK_REPLIES,
   };
 }
 
-export const RULE_BASE_SIZE = RULE_BASE.length;
+export const RULE_BASE_SIZE = INTENTS.length;

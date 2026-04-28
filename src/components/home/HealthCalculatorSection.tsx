@@ -86,6 +86,16 @@ function deriveNutritionTargets(form: FormState, targetCalories: number): Nutrit
   return { proteinG, carbsG, fatsG, waterMl };
 }
 
+function normalizeCalculatorForm(form: FormState): FormState {
+  return {
+    ...form,
+    age: form.age > 0 ? form.age : defaultForm.age,
+    heightCm: form.heightCm > 0 ? form.heightCm : defaultForm.heightCm,
+    weightKg: form.weightKg > 0 ? form.weightKg : defaultForm.weightKg,
+    bodyFat: form.bodyFat && form.bodyFat > 0 ? form.bodyFat : undefined
+  };
+}
+
 export function HealthCalculatorSection({ products }: HealthCalculatorSectionProps) {
   const [form, setForm] = useState<FormState>(defaultForm);
   const [submittedForm, setSubmittedForm] = useState<FormState>(defaultForm);
@@ -117,7 +127,9 @@ export function HealthCalculatorSection({ products }: HealthCalculatorSectionPro
       : "bg-amber-100 text-amber-700 border-amber-300";
 
   function handleCalculate() {
-    setSubmittedForm({ ...form });
+    const normalizedForm = normalizeCalculatorForm(form);
+    setForm(normalizedForm);
+    setSubmittedForm(normalizedForm);
   }
 
   return (
@@ -139,9 +151,12 @@ export function HealthCalculatorSection({ products }: HealthCalculatorSectionPro
                 type="number"
                 min={15}
                 max={85}
-                value={form.age}
+                value={form.age === 0 ? "" : form.age}
                 onChange={(event) =>
-                  setForm((current) => ({ ...current, age: Number(event.target.value) || current.age }))
+                  setForm((current) => ({
+                    ...current,
+                    age: event.target.value === "" ? 0 : Number(event.target.value)
+                  }))
                 }
                 className="field mt-1"
               />
@@ -166,11 +181,11 @@ export function HealthCalculatorSection({ products }: HealthCalculatorSectionPro
                 type="number"
                 min={120}
                 max={220}
-                value={form.heightCm}
+                value={form.heightCm === 0 ? "" : form.heightCm}
                 onChange={(event) =>
                   setForm((current) => ({
                     ...current,
-                    heightCm: Number(event.target.value) || current.heightCm
+                    heightCm: event.target.value === "" ? 0 : Number(event.target.value)
                   }))
                 }
                 className="field mt-1"
@@ -183,11 +198,11 @@ export function HealthCalculatorSection({ products }: HealthCalculatorSectionPro
                 type="number"
                 min={35}
                 max={220}
-                value={form.weightKg}
+                value={form.weightKg === 0 ? "" : form.weightKg}
                 onChange={(event) =>
                   setForm((current) => ({
                     ...current,
-                    weightKg: Number(event.target.value) || current.weightKg
+                    weightKg: event.target.value === "" ? 0 : Number(event.target.value)
                   }))
                 }
                 className="field mt-1"

@@ -52,7 +52,6 @@ export async function POST(request: Request) {
       usedContext: {
         kbSize: RULE_BASE_SIZE,
         matchedIntentId: result.matchedIntentId ?? null,
-        matchedTrigger: result.matchedTrigger ?? null,
         matchMode: result.mode,
       },
     },
