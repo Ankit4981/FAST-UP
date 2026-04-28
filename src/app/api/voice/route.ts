@@ -1,30 +1,27 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getProducts } from "@/lib/catalog";
+import { getRuleBasedReply } from "@/lib/ruleBasedAgent";
 import { checkRateLimit, getClientIp, rateLimitHeaders } from "@/lib/rateLimit";
-import { detectGoalFromText, generateSmartAssistantReply, toVoiceSentence } from "@/lib/wellnessEngine";
 
 const voiceSchema = z.object({
   messages: z
     .array(
       z.object({
         role: z.enum(["user", "assistant"]),
-        content: z.string().min(1).max(500)
+        content: z.string().min(1).max(500),
       })
     )
     .min(1)
-    .max(12),
-  lang: z.enum(["en", "hi"]).optional()
+    .max(20),
 });
 
 export async function POST(request: Request) {
   const ip = getClientIp(request);
-
   const rateLimit = checkRateLimit({
-    key: `voice-chat:${ip}`,
+    key: `voice-rule-based:${ip}`,
     limit: 40,
-    windowMs: 60 * 1000
+    windowMs: 60 * 1000,
   });
 
   if (!rateLimit.allowed) {
@@ -39,28 +36,21 @@ export async function POST(request: Request) {
 
   if (!parsed.success) {
     return NextResponse.json(
-      { message: "I can help once you repeat your question clearly." },
+      { message: "Please repeat your question clearly." },
       { status: 400, headers: rateLimitHeaders(rateLimit) }
     );
   }
 
   const latestMessage = parsed.data.messages.at(-1)?.content ?? "";
-  const fallbackGoal =
-    [...parsed.data.messages]
-      .reverse()
-      .map((message) => detectGoalFromText(message.content))
-      .find(Boolean) ?? undefined;
-
-  const products = await getProducts({ limit: 120, sort: "rating-desc" });
-
-  const response = generateSmartAssistantReply({
-    message: latestMessage,
-    products,
-    fallbackGoal
-  });
+  const result = getRuleBasedReply(latestMessage);
 
   return NextResponse.json(
-    { message: toVoiceSentence(response) },
+    {
+      message: result.message,
+      quickReplies: result.quickReplies,
+      mode: "rule_based_fastup_voice",
+      matchMode: result.mode,
+    },
     { status: 200, headers: rateLimitHeaders(rateLimit) }
   );
 }

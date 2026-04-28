@@ -1,23 +1,22 @@
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { authOptions } from "@/lib/auth";
-import { getProducts } from "@/lib/catalog";
-import { getOrdersByEmail } from "@/lib/orders";
+import {
+  RULE_BASE_SIZE,
+  getRuleBasedReply,
+} from "@/lib/ruleBasedAgent";
 import { checkRateLimit, getClientIp, rateLimitHeaders } from "@/lib/rateLimit";
-import { detectGoalFromText, generateSmartAssistantReply } from "@/lib/wellnessEngine";
 
 const chatSchema = z.object({
   messages: z
     .array(
       z.object({
         role: z.enum(["user", "assistant"]),
-        content: z.string().min(1).max(1200)
+        content: z.string().min(1).max(1200),
       })
     )
     .min(1)
-    .max(20)
+    .max(20),
 });
 
 export async function POST(request: Request) {
@@ -28,14 +27,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Invalid chat payload." }, { status: 400 });
   }
 
-  const session = await getServerSession(authOptions);
-  const identity = session?.user?.email?.toLowerCase().trim() ?? "guest";
   const ip = getClientIp(request);
-
   const rateLimit = checkRateLimit({
-    key: `chat:${ip}:${identity}`,
+    key: `chat-rule-based:${ip}`,
     limit: 40,
-    windowMs: 60 * 1000
+    windowMs: 60 * 1000,
   });
 
   if (!rateLimit.allowed) {
@@ -46,32 +42,19 @@ export async function POST(request: Request) {
   }
 
   const latestMessage = parsed.data.messages.at(-1)?.content ?? "";
-  const fallbackGoal =
-    [...parsed.data.messages]
-      .reverse()
-      .map((message) => detectGoalFromText(message.content))
-      .find(Boolean) ?? undefined;
-
-  const [products, orders] = await Promise.all([
-    getProducts({ limit: 120, sort: "rating-desc" }),
-    getOrdersByEmail(session?.user?.email)
-  ]);
-
-  const message = generateSmartAssistantReply({
-    message: latestMessage,
-    products,
-    orders,
-    fallbackGoal
-  });
+  const result = getRuleBasedReply(latestMessage);
 
   return NextResponse.json(
     {
-      message,
-      mode: "smart_free_assistant",
+      message: result.message,
+      quickReplies: result.quickReplies,
+      mode: "rule_based_fastup_assistant",
       usedContext: {
-        products: products.length,
-        orders: orders.length
-      }
+        kbSize: RULE_BASE_SIZE,
+        matchedIntentId: result.matchedIntentId ?? null,
+        matchedTrigger: result.matchedTrigger ?? null,
+        matchMode: result.mode,
+      },
     },
     { status: 200, headers: rateLimitHeaders(rateLimit) }
   );

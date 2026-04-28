@@ -29,7 +29,6 @@ import {
   activityMeta,
   calculateHealthReport,
   createProgressInsight,
-  generateSmartAssistantReply,
   getAchievementBadges,
   getDefaultHealthInputs,
   goalMeta,
@@ -428,20 +427,22 @@ export function WellnessLanding({ products }: WellnessLandingProps) {
           }
         ]);
       } else {
-        const fallback = generateSmartAssistantReply({
-          message: prompt,
-          products,
-          fallbackGoal: selectedGoal
-        });
-        setChatRows((current) => [...current, { role: "assistant", content: fallback }]);
+        setChatRows((current) => [
+          ...current,
+          {
+            role: "assistant",
+            content: "I'm sorry, I didn't understand that. Could you please rephrase your question?"
+          }
+        ]);
       }
     } catch {
-      const fallback = generateSmartAssistantReply({
-        message: prompt,
-        products,
-        fallbackGoal: selectedGoal
-      });
-      setChatRows((current) => [...current, { role: "assistant", content: fallback }]);
+      setChatRows((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: "I'm sorry, I didn't understand that. Could you please rephrase your question?"
+        }
+      ]);
     } finally {
       setChatLoading(false);
     }
