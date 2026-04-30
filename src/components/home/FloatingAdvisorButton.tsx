@@ -22,6 +22,7 @@ export function FloatingAdvisorButton({ asCtaButton = false }: Props) {
 
   return (
     <Link
+      id="feature-ai-advisor"
       href="/#smart-calculator"
       aria-label="Open Health Calculator"
       className="group fixed bottom-6 left-4 z-40 inline-flex items-center gap-2 rounded-full bg-brand-orange px-4 py-3 text-sm font-bold text-white shadow-lift transition hover:-translate-y-0.5 hover:bg-brand-orangeDark sm:bottom-6 sm:left-6"

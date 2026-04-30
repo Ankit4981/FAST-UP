@@ -383,6 +383,7 @@ export function ChatWidget() {
     <>
       {!open && (
         <button
+          id="feature-chatbot-launcher"
           type="button"
           aria-label="Open Fast&Up Assistant"
           onClick={() => setOpen(true)}

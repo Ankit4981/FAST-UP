@@ -1,10 +1,12 @@
 "use client";
 
 import {
+  ArrowDown,
   ArrowRight,
   Bot,
   Calculator,
   ChevronLeft,
+  ChevronRight,
   MessageCircle,
   Mic,
   Sparkles,
@@ -12,28 +14,17 @@ import {
   X,
   type LucideIcon
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-type NutritionValues = {
-  protein: number;
-  calories: number;
-  carbs: number;
-  fats: number;
-};
-
-type FoodProfile = NutritionValues & {
-  label: string;
-  aliases: string[];
-  serving: string;
-  unit: string;
-  gramBased?: boolean;
-};
-
-type NutritionInsight = {
-  food: FoodProfile;
-  amountLabel: string;
-  totals: NutritionValues;
-};
+import {
+  SMART_NUTRITION_DEFAULT_LOG,
+  SMART_NUTRITION_QUICK_LOGS,
+  SMART_NUTRITION_SUPPORTED_FOODS,
+  composeProteinFeedback,
+  formatNutritionValue,
+  parseSmartFoodLog,
+  type NutritionInsight
+} from "@/lib/smartNutrition";
 
 type FeatureSlide = {
   id: "advisor" | "chatbot" | "bmi" | "nutrition";
@@ -44,140 +35,21 @@ type FeatureSlide = {
   accent: string;
 };
 
-const DEFAULT_FOOD_LOG = "I ate 2 chapatis";
+type FeatureTarget = {
+  selectors: string[];
+  label: string;
+};
+
+type ArrowMarker = {
+  label: string;
+  left: number;
+  top: number;
+};
 
 const QUICK_CHAT_PROMPTS = [
   "Help me choose by goal",
   "Compare whey vs plant protein",
   "How should I use this product?"
-];
-
-const QUICK_FOOD_LOGS = ["I ate 2 chapatis", "1 bowl dal", "3 eggs", "1 banana", "150g paneer"];
-
-const FOOD_PROFILES: FoodProfile[] = [
-  {
-    label: "Chapati",
-    aliases: ["chapati", "chapatis", "roti", "rotis"],
-    serving: "per 1 piece",
-    unit: "chapatis",
-    protein: 3,
-    calories: 120,
-    carbs: 18,
-    fats: 3
-  },
-  {
-    label: "Rice",
-    aliases: ["rice", "bowl rice", "cooked rice"],
-    serving: "per 1 bowl",
-    unit: "bowls",
-    protein: 4,
-    calories: 206,
-    carbs: 45,
-    fats: 0.4
-  },
-  {
-    label: "Dal",
-    aliases: ["dal", "lentils", "bowl dal", "dahl"],
-    serving: "per 1 bowl",
-    unit: "bowls",
-    protein: 9,
-    calories: 198,
-    carbs: 28,
-    fats: 4
-  },
-  {
-    label: "Egg",
-    aliases: ["egg", "eggs", "boiled egg"],
-    serving: "per 1 egg",
-    unit: "eggs",
-    protein: 6,
-    calories: 72,
-    carbs: 0.4,
-    fats: 5
-  },
-  {
-    label: "Paneer",
-    aliases: ["paneer", "cottage cheese"],
-    serving: "per 100g",
-    unit: "servings",
-    gramBased: true,
-    protein: 18,
-    calories: 265,
-    carbs: 4,
-    fats: 20
-  },
-  {
-    label: "Chicken Breast",
-    aliases: ["chicken", "chicken breast", "grilled chicken"],
-    serving: "per 100g",
-    unit: "servings",
-    gramBased: true,
-    protein: 31,
-    calories: 165,
-    carbs: 0,
-    fats: 3.6
-  },
-  {
-    label: "Milk",
-    aliases: ["milk", "glass milk"],
-    serving: "per 1 glass",
-    unit: "glasses",
-    protein: 8,
-    calories: 150,
-    carbs: 12,
-    fats: 8
-  },
-  {
-    label: "Oats",
-    aliases: ["oats", "oatmeal", "bowl oats"],
-    serving: "per 1 bowl",
-    unit: "bowls",
-    protein: 6,
-    calories: 150,
-    carbs: 27,
-    fats: 3
-  },
-  {
-    label: "Banana",
-    aliases: ["banana", "bananas"],
-    serving: "per 1 medium banana",
-    unit: "bananas",
-    protein: 1.3,
-    calories: 105,
-    carbs: 27,
-    fats: 0.3
-  },
-  {
-    label: "Almonds",
-    aliases: ["almond", "almonds", "handful almonds"],
-    serving: "per 1 handful",
-    unit: "handfuls",
-    protein: 6,
-    calories: 164,
-    carbs: 6,
-    fats: 14
-  },
-  {
-    label: "Yogurt",
-    aliases: ["yogurt", "curd", "dahi"],
-    serving: "per 1 cup",
-    unit: "cups",
-    protein: 10,
-    calories: 150,
-    carbs: 12,
-    fats: 4
-  },
-  {
-    label: "Tofu",
-    aliases: ["tofu"],
-    serving: "per 100g",
-    unit: "servings",
-    gramBased: true,
-    protein: 8,
-    calories: 76,
-    carbs: 1.9,
-    fats: 4.8
-  }
 ];
 
 const FEATURE_SLIDES: FeatureSlide[] = [
@@ -235,73 +107,53 @@ const FEATURE_SLIDES: FeatureSlide[] = [
   }
 ];
 
-function normalizeText(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9.\s]/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function extractNumber(value: string) {
-  const match = value.match(/(\d+(?:\.\d+)?)/);
-  if (!match) {
-    return 1;
+const FEATURE_TARGETS: Record<FeatureSlide["id"], FeatureTarget> = {
+  advisor: {
+    selectors: ["#feature-ai-advisor", "a[href='/fastandup-advisor.html']"],
+    label: "AI Advisor"
+  },
+  chatbot: {
+    selectors: ["#feature-chatbot-launcher", "section[aria-label='Fast&Up Assistant']"],
+    label: "Chatbot"
+  },
+  bmi: {
+    selectors: ["#smart-calculator"],
+    label: "BMI Calculator"
+  },
+  nutrition: {
+    selectors: ["#smart-nutrition-tracker"],
+    label: "Smart Nutrition Tracker"
   }
+};
 
-  const parsed = Number(match[1]);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
-}
-
-function toOneDecimal(value: number) {
-  return Math.round(value * 10) / 10;
-}
-
-function formatValue(value: number) {
-  return Number.isInteger(value) ? String(value) : value.toFixed(1);
-}
-
-function parseFoodLog(log: string): NutritionInsight | null {
-  const normalized = normalizeText(log);
-  if (!normalized) {
-    return null;
-  }
-
-  const food = FOOD_PROFILES.find((profile) => profile.aliases.some((alias) => normalized.includes(alias)));
-  if (!food) {
-    return null;
-  }
-
-  const quantity = extractNumber(normalized);
-  const gramsMatch = normalized.match(/(\d+(?:\.\d+)?)\s*g\b/);
-  const gramAmount = gramsMatch ? Number(gramsMatch[1]) : null;
-
-  const multiplier = food.gramBased && gramAmount ? gramAmount / 100 : quantity;
-  const amountLabel = food.gramBased && gramAmount ? `${formatValue(gramAmount)}g` : `${formatValue(quantity)} ${food.unit}`;
-
-  return {
-    food,
-    amountLabel,
-    totals: {
-      protein: toOneDecimal(food.protein * multiplier),
-      calories: toOneDecimal(food.calories * multiplier),
-      carbs: toOneDecimal(food.carbs * multiplier),
-      fats: toOneDecimal(food.fats * multiplier)
+function locateFeatureTarget(selectors: string[]) {
+  for (const selector of selectors) {
+    const element = document.querySelector(selector);
+    if (element instanceof HTMLElement) {
+      return element;
     }
-  };
+  }
+  return null;
 }
 
-function composeProteinFeedback(insight: NutritionInsight | null) {
-  if (!insight) {
-    return "Try a food log like \"I ate 2 chapatis\" or \"1 bowl dal\" to preview nutrition insights.";
-  }
+function placeArrowNearElement(element: HTMLElement, label: string): ArrowMarker {
+  const rect = element.getBoundingClientRect();
+  const left = Math.max(28, Math.min(window.innerWidth - 28, rect.left + rect.width / 2));
+  const top = Math.max(20, rect.top - 44);
 
-  return `You consumed approximately ${formatValue(insight.totals.protein)}g of protein from ${insight.amountLabel}.`;
+  return { label, left, top };
 }
 
 export function FeatureOnboardingOverlay() {
   const [open, setOpen] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
-  const [foodLog, setFoodLog] = useState(DEFAULT_FOOD_LOG);
+  const [foodLog, setFoodLog] = useState(SMART_NUTRITION_DEFAULT_LOG);
   const [nutritionInsight, setNutritionInsight] = useState<NutritionInsight | null>(() =>
-    parseFoodLog(DEFAULT_FOOD_LOG)
+    parseSmartFoodLog(SMART_NUTRITION_DEFAULT_LOG)
   );
+  const [arrowMarker, setArrowMarker] = useState<ArrowMarker | null>(null);
+
+  const highlightedElementRef = useRef<HTMLElement | null>(null);
 
   const isLastSlide = slideIndex === FEATURE_SLIDES.length - 1;
   const proteinFeedback = composeProteinFeedback(nutritionInsight);
@@ -345,21 +197,108 @@ export function FeatureOnboardingOverlay() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
+  useEffect(() => {
+    return () => {
+      if (highlightedElementRef.current) {
+        highlightedElementRef.current.classList.remove("feature-guide-target");
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!arrowMarker || !highlightedElementRef.current) {
+      return;
+    }
+
+    const element = highlightedElementRef.current;
+    const markerLabel = arrowMarker.label;
+
+    function updateArrowPosition() {
+      const next = placeArrowNearElement(element, markerLabel);
+      setArrowMarker(next);
+    }
+
+    window.addEventListener("scroll", updateArrowPosition, { passive: true });
+    window.addEventListener("resize", updateArrowPosition);
+
+    const autoClearTimer = window.setTimeout(() => {
+      element.classList.remove("feature-guide-target");
+      highlightedElementRef.current = null;
+      setArrowMarker(null);
+    }, 9000);
+
+    return () => {
+      window.removeEventListener("scroll", updateArrowPosition);
+      window.removeEventListener("resize", updateArrowPosition);
+      window.clearTimeout(autoClearTimer);
+    };
+  }, [arrowMarker]);
+
+  function clearCurrentHighlight() {
+    if (highlightedElementRef.current) {
+      highlightedElementRef.current.classList.remove("feature-guide-target");
+      highlightedElementRef.current = null;
+    }
+  }
+
   function runNutritionPreview(nextLog: string) {
     setFoodLog(nextLog);
-    setNutritionInsight(parseFoodLog(nextLog));
+    setNutritionInsight(parseSmartFoodLog(nextLog));
+  }
+
+  function showFeatureWithArrow(featureId: FeatureSlide["id"]) {
+    clearCurrentHighlight();
+
+    const targetConfig = FEATURE_TARGETS[featureId];
+    const targetElement = locateFeatureTarget(targetConfig.selectors);
+
+    setOpen(false);
+
+    if (!targetElement) {
+      setArrowMarker(null);
+      return;
+    }
+
+    highlightedElementRef.current = targetElement;
+    targetElement.classList.add("feature-guide-target");
+    targetElement.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+
+    window.setTimeout(() => {
+      setArrowMarker(placeArrowNearElement(targetElement, targetConfig.label));
+    }, 420);
   }
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-[85] inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-white/90 px-4 py-2 text-xs font-black uppercase tracking-wider text-brand-orange shadow-lift backdrop-blur-sm transition hover:border-brand-orange hover:bg-white animate-onboarding-pulse"
-      >
-        <Sparkles size={14} />
-        Revisit Feature Guide
-      </button>
+      <>
+        <button
+          type="button"
+          onClick={() => {
+            clearCurrentHighlight();
+            setArrowMarker(null);
+            setOpen(true);
+          }}
+          className="fixed bottom-5 right-5 z-[85] inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-white/90 px-4 py-2 text-xs font-black uppercase tracking-wider text-brand-orange shadow-lift backdrop-blur-sm transition hover:border-brand-orange hover:bg-white animate-onboarding-pulse"
+        >
+          <Sparkles size={14} />
+          Revisit Feature Guide
+        </button>
+
+        {arrowMarker ? (
+          <button
+            type="button"
+            onClick={() => {
+              clearCurrentHighlight();
+              setArrowMarker(null);
+            }}
+            className="fixed z-[88] inline-flex -translate-x-1/2 items-center gap-1 rounded-full bg-brand-black px-3 py-1.5 text-xs font-black uppercase tracking-wider text-white shadow-lift"
+            style={{ top: `${arrowMarker.top}px`, left: `${arrowMarker.left}px` }}
+          >
+            <ArrowDown size={13} className="text-brand-orange" />
+            {arrowMarker.label}
+          </button>
+        ) : null}
+      </>
     );
   }
 
@@ -395,14 +334,31 @@ export function FeatureOnboardingOverlay() {
         </div>
 
         <div className="px-5 pb-5 pt-4 sm:px-7 sm:pb-6">
-          <div className="overflow-hidden rounded-2xl border border-white/70 bg-white/70">
+          <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/70">
+            <button
+              type="button"
+              aria-label="Previous feature"
+              className="absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-neutral-200 bg-white/95 p-2 text-neutral-700 shadow-sm transition hover:border-brand-orange hover:text-brand-orange sm:inline-flex"
+              onClick={() => setSlideIndex((current) => (current - 1 + FEATURE_SLIDES.length) % FEATURE_SLIDES.length)}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              type="button"
+              aria-label="Next feature"
+              className="absolute right-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-neutral-200 bg-white/95 p-2 text-neutral-700 shadow-sm transition hover:border-brand-orange hover:text-brand-orange sm:inline-flex"
+              onClick={() => setSlideIndex((current) => (current + 1) % FEATURE_SLIDES.length)}
+            >
+              <ChevronRight size={18} />
+            </button>
+
             <div className="flex transition-transform duration-500 ease-out" style={{ transform: `translateX(-${slideIndex * 100}%)` }}>
               {FEATURE_SLIDES.map((slide, index) => {
                 const Icon = slide.icon;
                 const isNutritionSlide = slide.id === "nutrition";
 
                 return (
-                  <section key={slide.id} className="w-full shrink-0 px-4 py-5 sm:px-6 sm:py-6">
+                  <section key={slide.id} className="w-full shrink-0 px-4 py-5 sm:px-10 sm:py-6">
                     <div className={`rounded-2xl border border-neutral-200 bg-gradient-to-br ${slide.accent} p-4 sm:p-6`}>
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
@@ -424,6 +380,17 @@ export function FeatureOnboardingOverlay() {
                             {point}
                           </div>
                         ))}
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          className="btn-secondary h-10 border-brand-orange/35 bg-white/90 px-4 text-brand-orange hover:border-brand-orange hover:bg-brand-orange hover:text-white"
+                          onClick={() => showFeatureWithArrow(slide.id)}
+                        >
+                          Show This Feature
+                          <ArrowRight size={15} />
+                        </button>
                       </div>
 
                       {slide.id === "chatbot" ? (
@@ -459,7 +426,7 @@ export function FeatureOnboardingOverlay() {
                           </div>
 
                           <div className="mt-3 flex flex-wrap gap-2">
-                            {QUICK_FOOD_LOGS.map((example) => (
+                            {SMART_NUTRITION_QUICK_LOGS.map((example) => (
                               <button key={example} type="button" className="chip h-8" onClick={() => runNutritionPreview(example)}>
                                 {example}
                               </button>
@@ -474,24 +441,24 @@ export function FeatureOnboardingOverlay() {
                             <div className="mt-3 grid gap-2 sm:grid-cols-4">
                               <div className="rounded-lg border border-neutral-200 bg-white px-3 py-2">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Protein</p>
-                                <p className="text-sm font-bold text-brand-black">{formatValue(nutritionInsight.totals.protein)}g</p>
+                                <p className="text-sm font-bold text-brand-black">{formatNutritionValue(nutritionInsight.totals.protein)}g</p>
                               </div>
                               <div className="rounded-lg border border-neutral-200 bg-white px-3 py-2">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Calories</p>
-                                <p className="text-sm font-bold text-brand-black">{formatValue(nutritionInsight.totals.calories)}</p>
+                                <p className="text-sm font-bold text-brand-black">{formatNutritionValue(nutritionInsight.totals.calories)}</p>
                               </div>
                               <div className="rounded-lg border border-neutral-200 bg-white px-3 py-2">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Carbs</p>
-                                <p className="text-sm font-bold text-brand-black">{formatValue(nutritionInsight.totals.carbs)}g</p>
+                                <p className="text-sm font-bold text-brand-black">{formatNutritionValue(nutritionInsight.totals.carbs)}g</p>
                               </div>
                               <div className="rounded-lg border border-neutral-200 bg-white px-3 py-2">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Fats</p>
-                                <p className="text-sm font-bold text-brand-black">{formatValue(nutritionInsight.totals.fats)}g</p>
+                                <p className="text-sm font-bold text-brand-black">{formatNutritionValue(nutritionInsight.totals.fats)}g</p>
                               </div>
                             </div>
                           ) : (
                             <p className="mt-3 text-xs text-neutral-500">
-                              Supported examples: chapati, rice, dal, egg, paneer, chicken, milk, oats, banana, almonds, yogurt, tofu.
+                              Supported examples: {SMART_NUTRITION_SUPPORTED_FOODS.map((food) => food.label).join(", ")}.
                             </p>
                           )}
 
@@ -552,7 +519,7 @@ export function FeatureOnboardingOverlay() {
             </div>
           </div>
 
-          <p className="mt-3 text-xs text-neutral-500">Use Left/Right arrow keys to move between cards. Press Esc to close.</p>
+          <p className="mt-3 text-xs text-neutral-500">Use Left/Right arrow keys or arrow buttons to move between features.</p>
         </div>
       </div>
     </div>

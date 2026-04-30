@@ -14,6 +14,15 @@ import {
   type GoalKey,
   type HealthInputs
 } from "@/lib/wellnessEngine";
+import {
+  SMART_NUTRITION_DEFAULT_LOG,
+  SMART_NUTRITION_QUICK_LOGS,
+  SMART_NUTRITION_SUPPORTED_FOODS,
+  composeProteinFeedback,
+  formatNutritionValue,
+  parseSmartFoodLog,
+  type NutritionInsight
+} from "@/lib/smartNutrition";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types";
 
@@ -99,6 +108,10 @@ function normalizeCalculatorForm(form: FormState): FormState {
 export function HealthCalculatorSection({ products }: HealthCalculatorSectionProps) {
   const [form, setForm] = useState<FormState>(defaultForm);
   const [submittedForm, setSubmittedForm] = useState<FormState>(defaultForm);
+  const [foodLog, setFoodLog] = useState(SMART_NUTRITION_DEFAULT_LOG);
+  const [nutritionInsight, setNutritionInsight] = useState<NutritionInsight | null>(() =>
+    parseSmartFoodLog(SMART_NUTRITION_DEFAULT_LOG)
+  );
 
   const inputs: HealthInputs = useMemo(
     () => ({
@@ -130,6 +143,11 @@ export function HealthCalculatorSection({ products }: HealthCalculatorSectionPro
     const normalizedForm = normalizeCalculatorForm(form);
     setForm(normalizedForm);
     setSubmittedForm(normalizedForm);
+  }
+
+  function handleFoodAnalyze(nextLog: string) {
+    setFoodLog(nextLog);
+    setNutritionInsight(parseSmartFoodLog(nextLog));
   }
 
   return (
@@ -400,6 +418,84 @@ export function HealthCalculatorSection({ products }: HealthCalculatorSectionPro
             <Flame size={15} className="text-brand-orange" />
             Direct product mapping to reduce guesswork
           </p>
+        </div>
+
+        <div id="smart-nutrition-tracker" className="mt-4 rounded-lg border border-neutral-200 bg-white p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="font-display text-2xl font-black uppercase text-brand-black sm:text-3xl">
+              Smart Nutrition Tracker
+            </h3>
+            <span className="rounded-full bg-brand-orange/10 px-3 py-1 text-[11px] font-black uppercase tracking-widest text-brand-orange">
+              New
+            </span>
+          </div>
+
+          <p className="mt-2 text-sm text-neutral-600">
+            Log food naturally (for example, &quot;I ate 2 chapatis&quot;) and get instant protein, calories,
+            carbs, and fats.
+          </p>
+
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <input
+              value={foodLog}
+              onChange={(event) => setFoodLog(event.target.value)}
+              className="field h-11"
+              placeholder="Example: I ate 2 chapatis"
+            />
+            <button type="button" className="btn-primary h-11 px-5" onClick={() => handleFoodAnalyze(foodLog)}>
+              Analyze Food
+            </button>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {SMART_NUTRITION_QUICK_LOGS.map((example) => (
+              <button
+                key={example}
+                type="button"
+                className="chip h-8"
+                onClick={() => handleFoodAnalyze(example)}
+              >
+                {example}
+              </button>
+            ))}
+          </div>
+
+          <p className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm font-semibold text-brand-black">
+            {composeProteinFeedback(nutritionInsight)}
+          </p>
+
+          {nutritionInsight ? (
+            <div className="mt-3 grid gap-2 sm:grid-cols-4">
+              <div className="rounded-lg border border-neutral-200 bg-white px-3 py-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Protein</p>
+                <p className="text-sm font-bold text-brand-black">
+                  {formatNutritionValue(nutritionInsight.totals.protein)}g
+                </p>
+              </div>
+              <div className="rounded-lg border border-neutral-200 bg-white px-3 py-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Calories</p>
+                <p className="text-sm font-bold text-brand-black">
+                  {formatNutritionValue(nutritionInsight.totals.calories)}
+                </p>
+              </div>
+              <div className="rounded-lg border border-neutral-200 bg-white px-3 py-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Carbs</p>
+                <p className="text-sm font-bold text-brand-black">
+                  {formatNutritionValue(nutritionInsight.totals.carbs)}g
+                </p>
+              </div>
+              <div className="rounded-lg border border-neutral-200 bg-white px-3 py-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Fats</p>
+                <p className="text-sm font-bold text-brand-black">
+                  {formatNutritionValue(nutritionInsight.totals.fats)}g
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="mt-3 text-xs text-neutral-500">
+              Supported foods: {SMART_NUTRITION_SUPPORTED_FOODS.map((food) => food.label).join(", ")}.
+            </p>
+          )}
         </div>
       </div>
     </section>
