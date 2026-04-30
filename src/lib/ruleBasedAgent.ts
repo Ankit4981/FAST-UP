@@ -172,7 +172,7 @@ const conversationalSupportIntents: IntentDefinition[] = [
   intent(
     "help_general",
     "help",
-    ["help", "need help", "can you help", "assist me", "support me", "i need support"],
+    ["need help", "can you help", "assist me", "support me", "i need support", "help me"],
     [
       "Sure, what do you need help with?",
       "I'm here to assist you.",
@@ -186,7 +186,7 @@ const conversationalSupportIntents: IntentDefinition[] = [
       "Let me know your question.",
       "Share the details and I'll guide you step by step."
     ],
-    10
+    6
   ),
   intent(
     "thanks_general",
@@ -452,9 +452,17 @@ const guidedCommerceIntents: IntentDefinition[] = [
       "best product",
       "which product is best",
       "i want to buy a product",
+      "i want to buy product",
       "suggest me a product",
       "which will be the best product",
-      "buy product for me"
+      "buy product for me",
+      "help me buy a product",
+      "help me buy product",
+      "help me buy a product for hydration",
+      "hydration product",
+      "best hydration supplement",
+      "recommend supplement",
+      "suggest supplement"
     ],
     [
       "I can help with that. What category are you interested in?",
@@ -488,7 +496,10 @@ const guidedCommerceIntents: IntentDefinition[] = [
       "low price",
       "best under price",
       "which will be the affordable product",
-      "best affordable product"
+      "best affordable product",
+      "cheap supplement",
+      "affordable supplement",
+      "budget supplement"
     ],
     [
       "We have several budget-friendly options available.",
@@ -514,7 +525,7 @@ const guidedCommerceIntents: IntentDefinition[] = [
   intent(
     "guided_premium_products",
     "premium_products",
-    ["premium", "expensive product", "high quality", "best quality", "top quality product"],
+    ["premium", "expensive product", "high quality", "best quality", "top quality product", "premium supplement", "best quality supplement"],
     [
       "We offer premium products with top performance.",
       "High-quality products are available with advanced features.",
@@ -1075,7 +1086,7 @@ const extendedOrderIntents: IntentDefinition[] = orderTopics.map((item) =>
 );
 
 const baseOfferIntents: IntentDefinition[] = [
-  intent("offer_1", "offers", ["offers"], "Check our website for latest offers.", 9),
+  intent("offer_1", "offers", ["offers", "offer", "any offer"], "Check our website for latest offers.", 9),
   intent("offer_2", "offers", ["discount"], "We have regular discounts online.", 9),
   intent("offer_3", "offers", ["coupon"], "Apply coupon at checkout for savings.", 9),
   intent("offer_4", "offers", ["price"], "Prices vary by product. Visit website.", 8),
@@ -1108,6 +1119,8 @@ const offerTopics = [
   ["offer_28", ["limited deal"], "Limited-time deals are updated regularly."],
   ["offer_29", ["combo savings"], "Combo packs are great for better savings."],
   ["offer_30", ["offer details"], "Visit website for complete offer details."],
+  ["offer_31", ["any offer for supplement", "offer for supplement", "supplement offer"], "Yes, supplement offers are available regularly. Check current deals on the offers section."],
+  ["offer_32", ["is there any offer", "any discount now"], "Yes, we often run discounts and combo deals. Please check the latest offers section."],
 ] as const;
 
 const extendedOfferIntents: IntentDefinition[] = offerTopics.map((item) =>
@@ -1315,7 +1328,12 @@ function getScoreByTrigger(message: string, trigger: string) {
   if (triggerTokens.length === 0) return 0;
 
   if (triggerTokens.length === 1) {
-    return messageTokens.includes(triggerTokens[0]) ? 100 : 0;
+    const token = triggerTokens[0];
+    const tokenVariants = new Set<string>([
+      token,
+      token.endsWith("s") && token.length > 3 ? token.slice(0, -1) : `${token}s`,
+    ]);
+    return messageTokens.some((messageToken) => tokenVariants.has(messageToken)) ? 100 : 0;
   }
 
   const compactMessage = normalizedMessage.replace(/\s+/g, "");
@@ -1343,8 +1361,101 @@ function getScoreByTrigger(message: string, trigger: string) {
   return 0;
 }
 
+function hasAnyToken(tokens: string[], values: string[]) {
+  return values.some((value) => tokens.includes(value));
+}
+
+function getContextualBoost(intentDef: IntentDefinition, normalizedMessage: string) {
+  const tokens = textToTokens(normalizedMessage);
+  const category = intentDef.category;
+
+  const buyTokens = [
+    "buy",
+    "purchase",
+    "suggest",
+    "recommend",
+    "best",
+    "affordable",
+    "budget",
+    "cheap",
+    "premium",
+    "hydration",
+    "supplement",
+    "product",
+    "products",
+  ];
+  const offerTokens = ["offer", "offers", "discount", "coupon", "deal", "sale", "cashback", "promo"];
+
+  const buyIntentCategories: IntentCategory[] = [
+    "product_recommendation",
+    "affordable_products",
+    "premium_products",
+    "product_comparison",
+    "pricing",
+    "offers",
+    "benefits",
+  ];
+
+  const hasBuySignals = hasAnyToken(tokens, buyTokens);
+  const hasOfferSignals = hasAnyToken(tokens, offerTokens);
+  const hasHelpVerb = tokens.includes("help");
+
+  let boost = 0;
+
+  if (hasBuySignals && buyIntentCategories.includes(category)) {
+    boost += 24;
+  }
+
+  if (hasBuySignals && category === "help") {
+    boost -= 26;
+  }
+
+  if (hasOfferSignals && category === "offers") {
+    boost += 30;
+  }
+
+  if (hasOfferSignals && category === "help") {
+    boost -= 20;
+  }
+
+  if (
+    (normalizedMessage.includes("help me buy") || normalizedMessage.includes("buy for")) &&
+    category === "product_recommendation"
+  ) {
+    boost += 40;
+  }
+
+  if (
+    normalizedMessage.includes("help me buy") &&
+    category === "help"
+  ) {
+    boost -= 35;
+  }
+
+  if (
+    normalizedMessage.includes("for hydration") &&
+    (category === "product_recommendation" || category === "benefits")
+  ) {
+    boost += 22;
+  }
+
+  if (
+    normalizedMessage.includes("how to use") &&
+    category === "usage"
+  ) {
+    boost += 25;
+  }
+
+  if (hasHelpVerb && hasBuySignals && category === "product_recommendation") {
+    boost += 28;
+  }
+
+  return boost;
+}
+
 function findIntent(message: string): IntentDefinition | null {
   const candidates: ScoredIntent[] = [];
+  const normalizedMessage = normalizeText(message);
 
   for (const intentDef of INTENTS) {
     let bestTriggerScore = 0;
@@ -1355,9 +1466,10 @@ function findIntent(message: string): IntentDefinition | null {
     }
 
     if (bestTriggerScore > 0) {
+      const contextualBoost = getContextualBoost(intentDef, normalizedMessage);
       candidates.push({
         intent: intentDef,
-        score: bestTriggerScore + intentDef.priority,
+        score: bestTriggerScore + intentDef.priority + contextualBoost,
       });
     }
   }
