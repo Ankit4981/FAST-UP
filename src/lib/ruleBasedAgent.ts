@@ -2,6 +2,20 @@ export type AgentMatchMode = "matched" | "clarify" | "fallback";
 
 type IntentCategory =
   | "greeting"
+  | "goodbye"
+  | "help"
+  | "thanks"
+  | "error"
+  | "confirmation"
+  | "denial"
+  | "instructions"
+  | "unknown"
+  | "small_talk"
+  | "contact_support"
+  | "pricing"
+  | "account"
+  | "payment"
+  | "returns"
   | "benefits"
   | "usage"
   | "ingredients"
@@ -14,7 +28,7 @@ type IntentDefinition = {
   id: string;
   category: IntentCategory;
   triggers: string[];
-  response: string;
+  responses: string[];
   priority: number;
 };
 
@@ -35,7 +49,7 @@ export const START_GREETING =
 
 export const CALL_OPENING_SCRIPT = START_GREETING;
 
-export const FALLBACK_MESSAGE = "Sorry, I didn’t understand. Please rephrase.";
+export const FALLBACK_MESSAGE = "Sorry, I didn't understand. Please rephrase.";
 
 const CLARIFY_MESSAGE = "Could you please clarify your question?";
 
@@ -43,10 +57,16 @@ function intent(
   id: string,
   category: IntentCategory,
   triggers: string[],
-  response: string,
+  response: string | string[],
   priority = 1
 ): IntentDefinition {
-  return { id, category, triggers, response, priority };
+  return {
+    id,
+    category,
+    triggers,
+    responses: Array.isArray(response) ? response : [response],
+    priority,
+  };
 }
 
 const greetingIntents: IntentDefinition[] = [
@@ -101,6 +121,272 @@ const greetingIntents: IntentDefinition[] = [
     ["help"],
     "You can ask about products, usage, orders, or offers.",
     3
+  ),
+];
+
+const conversationalSupportIntents: IntentDefinition[] = [
+  intent(
+    "greeting_general",
+    "greeting",
+    ["hello", "hi", "hey", "greetings", "hello there", "hey there"],
+    [
+      "Hello! How can I assist you today?",
+      "Hi there! What can I do for you?",
+      "Hey! Need any help?",
+      "Greetings! How may I help?",
+      "Hi! What's up?",
+      "Hello! How can I support you?",
+      "Hey there! What do you need?",
+      "Hi! Ask me anything.",
+      "Hello! Ready to help.",
+      "Hey! Let's get started.",
+      "Namaste! I'm here to help with anything Fast&Up."
+    ],
+    10
+  ),
+  intent(
+    "goodbye_general",
+    "goodbye",
+    ["goodbye", "bye", "see you", "take care", "catch you later", "bye bye"],
+    [
+      "Goodbye! Have a great day.",
+      "See you soon!",
+      "Take care!",
+      "Bye! Come back anytime.",
+      "Catch you later!",
+      "Have a nice day!",
+      "Goodbye! Stay safe.",
+      "See you again!",
+      "Bye! Thanks for visiting.",
+      "Take it easy!",
+      "Thanks for chatting. See you soon!"
+    ],
+    10
+  ),
+  intent(
+    "help_general",
+    "help",
+    ["help", "need help", "can you help", "assist me", "support me", "i need support"],
+    [
+      "Sure, what do you need help with?",
+      "I'm here to assist you.",
+      "Tell me your issue.",
+      "How can I support you?",
+      "What's the problem?",
+      "Describe your concern.",
+      "I'll do my best to help.",
+      "Go ahead, I'm listening.",
+      "What do you need?",
+      "Let me know your question.",
+      "Share the details and I'll guide you step by step."
+    ],
+    10
+  ),
+  intent(
+    "thanks_general",
+    "thanks",
+    ["thanks", "thank you", "thx", "thanks a lot", "appreciate it"],
+    [
+      "You're welcome!",
+      "Glad I could help.",
+      "Anytime!",
+      "No problem!",
+      "Happy to help!",
+      "It's my pleasure.",
+      "Don't mention it.",
+      "Always here for you.",
+      "Cheers!",
+      "You're welcome.",
+      "Happy to support you whenever you need."
+    ],
+    10
+  ),
+  intent(
+    "error_general",
+    "error",
+    [
+      "something went wrong",
+      "error",
+      "not working",
+      "request failed",
+      "failed",
+      "system issue",
+      "technical issue"
+    ],
+    [
+      "Something went wrong.",
+      "Please try again.",
+      "Error occurred.",
+      "Retry after a moment.",
+      "System issue detected.",
+      "Unable to process request.",
+      "Try again later.",
+      "Temporary issue.",
+      "Request failed.",
+      "Please refresh and retry.",
+      "I detected a temporary issue, please retry in a few seconds."
+    ],
+    10
+  ),
+  intent(
+    "confirmation_general",
+    "confirmation",
+    ["yes", "correct", "confirmed", "exactly", "you are right", "that's true", "indeed"],
+    [
+      "Yes, that's correct.",
+      "Absolutely.",
+      "Right.",
+      "Correct.",
+      "That's true.",
+      "Yes.",
+      "Confirmed.",
+      "Exactly.",
+      "You're right.",
+      "Indeed.",
+      "Great, we're aligned."
+    ],
+    9
+  ),
+  intent(
+    "denial_general",
+    "denial",
+    ["no", "not correct", "incorrect", "not possible", "i disagree", "that wont work", "negative"],
+    [
+      "No, that's not correct.",
+      "I don't think so.",
+      "That's incorrect.",
+      "Not possible.",
+      "Sorry, no.",
+      "That won't work.",
+      "I disagree.",
+      "That's not right.",
+      "Negative.",
+      "Unfortunately not.",
+      "Let's try a different option."
+    ],
+    9
+  ),
+  intent(
+    "instructions_general",
+    "instructions",
+    ["instructions", "steps", "guide me", "what should i do", "how to proceed", "procedure"],
+    [
+      "Follow the steps carefully.",
+      "Enter valid details.",
+      "Check before submitting.",
+      "Complete all fields.",
+      "Try again step-by-step.",
+      "Make sure inputs are correct.",
+      "Proceed carefully.",
+      "Verify your data.",
+      "Double-check everything.",
+      "Follow instructions clearly.",
+      "I'll guide you through each step if you share your exact issue."
+    ],
+    10
+  ),
+  intent(
+    "unknown_general",
+    "unknown",
+    ["i didnt understand", "didn't understand", "unknown request", "unclear", "what do you mean", "rephrase"],
+    [
+      "I didn't understand that.",
+      "Can you rephrase?",
+      "Not sure about that.",
+      "Try asking differently.",
+      "I didn't get that.",
+      "Could you clarify?",
+      "Unknown request.",
+      "Please explain more.",
+      "That's unclear.",
+      "Try again.",
+      "Please share a little more context so I can help accurately."
+    ],
+    10
+  ),
+  intent(
+    "smalltalk_general",
+    "small_talk",
+    ["how are you", "whats up", "what's up", "are you there", "how is it going", "sup"],
+    [
+      "I'm just a bot, but I'm doing great!",
+      "Always ready to help.",
+      "I don't have feelings, but I'm here!",
+      "Just working as expected.",
+      "Ready when you are.",
+      "I'm functioning perfectly.",
+      "Let's solve something!",
+      "Ask me anything.",
+      "I'm active and ready.",
+      "All systems operational.",
+      "Fully online and ready to assist you."
+    ],
+    9
+  ),
+  intent(
+    "contact_support_general",
+    "contact_support",
+    ["customer care", "contact support", "talk to agent", "human support", "speak to representative"],
+    [
+      "Sure, I can connect you with support.",
+      "Please share your issue and order ID for faster help.",
+      "Customer support can help with account and order concerns.",
+      "I can route this to a human support specialist.",
+      "Please provide your phone or email linked to the order."
+    ],
+    9
+  ),
+  intent(
+    "pricing_general",
+    "pricing",
+    ["price", "pricing", "cost", "how much", "cheapest", "expensive"],
+    [
+      "Pricing varies by product and pack size.",
+      "Please check product page for the latest price.",
+      "Combo packs often provide better value.",
+      "You can use available offers at checkout for savings.",
+      "Tell me the product name and I can guide you on pricing options."
+    ],
+    8
+  ),
+  intent(
+    "account_general",
+    "account",
+    ["login issue", "cannot login", "sign in issue", "account help", "password reset", "signup issue"],
+    [
+      "I can help with account access issues.",
+      "Try resetting your password from the login page.",
+      "Please verify your email/phone and try again.",
+      "If signup fails, refresh and retry after a moment.",
+      "Share the exact account error and I'll guide the next steps."
+    ],
+    8
+  ),
+  intent(
+    "payment_general",
+    "payment",
+    ["payment failed", "upi failed", "card declined", "payment issue", "transaction failed", "cod available"],
+    [
+      "Please retry the payment once after a short wait.",
+      "If amount was deducted, share transaction details for support.",
+      "Try another payment method if the issue persists.",
+      "COD availability depends on location and cart value.",
+      "I can help you with payment troubleshooting step by step."
+    ],
+    8
+  ),
+  intent(
+    "returns_general",
+    "returns",
+    ["return", "refund", "replacement", "exchange", "cancel and refund", "return policy"],
+    [
+      "Returns and refunds follow the active policy window.",
+      "Please share order ID and issue details for return support.",
+      "Replacement is possible for eligible damaged or wrong items.",
+      "Refund is processed after verification.",
+      "I can guide you with the return process now."
+    ],
+    8
   ),
 ];
 
@@ -455,7 +741,7 @@ const baseOrderIntents: IntentDefinition[] = [
     "order_7",
     "orders",
     ["order confirmation"],
-    "You’ll receive confirmation via SMS/email.",
+    "You'll receive confirmation via SMS/email.",
     9
   ),
   intent(
@@ -597,7 +883,7 @@ const baseDeliveryIntents: IntentDefinition[] = [
     "delivery_9",
     "delivery",
     ["wrong product"],
-    "We’ll arrange replacement quickly.",
+    "We'll arrange replacement quickly.",
     9
   ),
   intent(
@@ -637,7 +923,7 @@ const extendedDeliveryIntents: IntentDefinition[] = deliveryTopics.map((item) =>
 );
 
 const baseFallbackIntents: IntentDefinition[] = [
-  intent("fallback_1", "fallback", ["unknown"], "Sorry, I didn’t understand. Please rephrase.", 5),
+  intent("fallback_1", "fallback", ["unknown"], "Sorry, I didn't understand. Please rephrase.", 5),
   intent(
     "fallback_2",
     "fallback",
@@ -657,7 +943,7 @@ const baseFallbackIntents: IntentDefinition[] = [
     "fallback_5",
     "fallback",
     ["???"],
-    "I didn’t get that. Try asking differently.",
+    "I didn't get that. Try asking differently.",
     5
   ),
 ];
@@ -676,7 +962,7 @@ const fallbackTopics = [
   ["fallback_16", ["skip"], "Please ask about products, usage, orders, or offers."],
   ["fallback_17", ["later"], "Sure. Ask anytime about products, usage, orders, or offers."],
   ["fallback_18", ["idk"], "Please rephrase your question in simple words."],
-  ["fallback_19", ["??"], "I didn’t get that. Please ask again clearly."],
+  ["fallback_19", ["??"], "I didn't get that. Please ask again clearly."],
   ["fallback_20", ["help topics"], "You can ask about products, usage, orders, or offers."],
 ] as const;
 
@@ -686,6 +972,7 @@ const extendedFallbackIntents: IntentDefinition[] = fallbackTopics.map((item) =>
 
 const INTENTS: IntentDefinition[] = [
   ...greetingIntents,
+  ...conversationalSupportIntents,
   ...baseBenefitIntents,
   ...extendedBenefitIntents,
   ...baseUsageIntents,
@@ -799,13 +1086,37 @@ function findIntent(message: string): IntentDefinition | null {
   return candidates[0].intent;
 }
 
+function stableHash(value: string) {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
+function pickIntentResponse(intentDef: IntentDefinition, message: string) {
+  if (intentDef.responses.length === 0) {
+    return CLARIFY_MESSAGE;
+  }
+
+  if (intentDef.responses.length === 1) {
+    return intentDef.responses[0];
+  }
+
+  const normalizedMessage = normalizeText(message);
+  const seed = normalizedMessage || intentDef.id;
+  const index = stableHash(`${intentDef.id}:${seed}`) % intentDef.responses.length;
+  return intentDef.responses[index];
+}
+
 export function getRuleBasedReply(message: string): RuleAgentResult {
   const matchedIntent = findIntent(message);
 
   if (matchedIntent) {
+    const response = pickIntentResponse(matchedIntent, message);
     return {
       mode: "matched",
-      message: withOptionsLine(matchedIntent.response),
+      message: withOptionsLine(response),
       quickReplies: QUICK_REPLIES,
       matchedIntentId: matchedIntent.id,
     };
