@@ -46,6 +46,122 @@ const STARTER_MESSAGES: ChatMessage[] = [
   },
 ];
 
+const VOICE_NAME_HINTS = [
+  "neural",
+  "natural",
+  "google us english",
+  "google uk english",
+  "microsoft aria",
+  "microsoft jenny",
+  "samantha",
+  "karen",
+  "ravi",
+];
+
+function pickBestVoice(voices: SpeechSynthesisVoice[]) {
+  if (!voices.length) return null;
+
+  let best: SpeechSynthesisVoice | null = null;
+  let bestScore = Number.NEGATIVE_INFINITY;
+
+  for (const voice of voices) {
+    const name = voice.name.toLowerCase();
+    const lang = voice.lang.toLowerCase();
+    let score = 0;
+
+    if (lang === "en-in") score += 18;
+    else if (lang.startsWith("en-")) score += 12;
+    else if (lang.startsWith("hi-")) score += 4;
+
+    if (voice.default) score += 2;
+    if (!voice.localService) score += 2;
+
+    for (const hint of VOICE_NAME_HINTS) {
+      if (name.includes(hint)) {
+        score += 8;
+      }
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      best = voice;
+    }
+  }
+
+  return best;
+}
+
+function normalizeForSpeech(text: string) {
+  return text
+    .replace(/\n-\s*/g, ". ")
+    .replace(/\n+/g, ". ")
+    .replace(/\s+/g, " ")
+    .replace(/fast&up/gi, "Fast and Up")
+    .replace(/\s+([,.;!?])/g, "$1")
+    .trim();
+}
+
+function splitSpeechChunks(text: string, maxLength = 170) {
+  const normalized = normalizeForSpeech(text);
+  if (!normalized) return [];
+
+  const sentenceBlocks = normalized
+    .replace(/([.!?])\s+/g, "$1|")
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  const chunks: string[] = [];
+
+  for (const sentence of sentenceBlocks) {
+    if (sentence.length <= maxLength) {
+      chunks.push(sentence);
+      continue;
+    }
+
+    const commaParts = sentence.split(/(?<=[,;:])\s+/);
+    let carry = "";
+
+    for (const part of commaParts) {
+      if (!part) continue;
+
+      if ((carry ? `${carry} ${part}` : part).length <= maxLength) {
+        carry = carry ? `${carry} ${part}` : part;
+        continue;
+      }
+
+      if (carry) {
+        chunks.push(carry.trim());
+        carry = "";
+      }
+
+      if (part.length <= maxLength) {
+        carry = part;
+        continue;
+      }
+
+      const words = part.split(" ");
+      let wordChunk = "";
+      for (const word of words) {
+        const next = wordChunk ? `${wordChunk} ${word}` : word;
+        if (next.length <= maxLength) {
+          wordChunk = next;
+        } else {
+          if (wordChunk) chunks.push(wordChunk.trim());
+          wordChunk = word;
+        }
+      }
+      if (wordChunk) carry = wordChunk;
+    }
+
+    if (carry) {
+      chunks.push(carry.trim());
+    }
+  }
+
+  return chunks;
+}
+
 function LiveBotAvatar({ size = "md" }: { size?: "sm" | "md" }) {
   const shellSize = size === "sm" ? "h-8 w-8" : "h-9 w-9";
   const eyeSize = size === "sm" ? "h-3 w-3" : "h-3.5 w-3.5";
@@ -191,6 +307,7 @@ export function ChatWidget() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  const preferredVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
   const voiceHistoryRef = useRef<ChatMessage[]>([]);
   const callActiveRef = useRef(false);
   const isMutedRef = useRef(false);
@@ -206,6 +323,28 @@ export function ChatWidget() {
   useEffect(() => {
     isMutedRef.current = isMuted;
   }, [isMuted]);
+
+  useEffect(() => {
+    synthRef.current = window.speechSynthesis;
+    const synth = synthRef.current;
+    if (!synth) return;
+
+    const updatePreferredVoice = () => {
+      const picked = pickBestVoice(synth.getVoices());
+      if (picked) {
+        preferredVoiceRef.current = picked;
+      }
+    };
+
+    updatePreferredVoice();
+    synth.onvoiceschanged = updatePreferredVoice;
+
+    return () => {
+      if (synth.onvoiceschanged === updatePreferredVoice) {
+        synth.onvoiceschanged = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -242,19 +381,27 @@ export function ChatWidget() {
 
   const speakText = useCallback(
     (text: string) => {
-      if (!synthRef.current) {
+      const synth = synthRef.current;
+      if (!synth) {
         return;
       }
 
-      synthRef.current.cancel();
+      stopRecognition();
+      synth.cancel();
       setVoiceStatus("speaking");
+      setVoiceError("");
 
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-US";
-      utterance.rate = 1.02;
-      utterance.pitch = 1;
+      const chunks = splitSpeechChunks(text);
+      if (chunks.length === 0) return;
 
-      utterance.onend = () => {
+      const voice = preferredVoiceRef.current ?? pickBestVoice(synth.getVoices());
+      if (voice) {
+        preferredVoiceRef.current = voice;
+      }
+
+      let chunkIndex = 0;
+
+      const finishSpeaking = () => {
         if (callActiveRef.current && !isMutedRef.current) {
           setVoiceStatus("listening");
           setTranscript("");
@@ -263,19 +410,43 @@ export function ChatWidget() {
           } catch {
             // no-op
           }
-        } else {
-          setVoiceStatus("idle");
+          return;
         }
+        setVoiceStatus("idle");
       };
 
-      utterance.onerror = () => {
-        setVoiceStatus("error");
-        setVoiceError("Voice playback failed. Please try again.");
+      const speakNext = () => {
+        if (chunkIndex >= chunks.length) {
+          finishSpeaking();
+          return;
+        }
+
+        const chunk = chunks[chunkIndex];
+        const utterance = new SpeechSynthesisUtterance(chunk);
+        const isQuestion = /\?\s*$/.test(chunk);
+
+        utterance.lang = voice?.lang ?? "en-IN";
+        utterance.voice = voice ?? null;
+        utterance.rate = isQuestion ? 0.99 : 0.97;
+        utterance.pitch = 1.02;
+        utterance.volume = 1;
+
+        utterance.onend = () => {
+          chunkIndex += 1;
+          window.setTimeout(speakNext, 90);
+        };
+
+        utterance.onerror = () => {
+          setVoiceStatus("error");
+          setVoiceError("Voice playback failed. Please try again.");
+        };
+
+        synth.speak(utterance);
       };
 
-      synthRef.current.speak(utterance);
+      speakNext();
     },
-    []
+    [stopRecognition]
   );
 
   const handleVoiceInput = useCallback(
@@ -315,7 +486,7 @@ export function ChatWidget() {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recognition: any = new SpeechRecognition();
-    recognition.lang = "en-US";
+    recognition.lang = "en-IN";
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     recognition.continuous = false;
