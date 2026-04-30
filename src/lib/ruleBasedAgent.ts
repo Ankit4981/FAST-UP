@@ -12,6 +12,12 @@ type IntentCategory =
   | "unknown"
   | "small_talk"
   | "contact_support"
+  | "product_recommendation"
+  | "affordable_products"
+  | "premium_products"
+  | "product_comparison"
+  | "order_tracking"
+  | "order_issue"
   | "pricing"
   | "account"
   | "payment"
@@ -387,6 +393,280 @@ const conversationalSupportIntents: IntentDefinition[] = [
       "I can guide you with the return process now."
     ],
     8
+  ),
+];
+
+const unknownIntentResponses = [
+  "I didn't understand that.",
+  "Can you rephrase your question?",
+  "I'm not sure about that.",
+  "Try asking differently.",
+  "Please clarify your request.",
+  "That's unclear to me.",
+  "Ask something related to products or orders.",
+  "I'm still learning.",
+  "Can you provide more details?",
+  "Let's try again.",
+  "I couldn't get that.",
+  "Try a specific question.",
+  "I'm here to help, please rephrase.",
+  "Unknown request.",
+  "Please explain more.",
+  "I may have missed your intent, can you ask in another way?",
+  "Share your question with a little more detail and I will help."
+];
+
+const guidedCommerceIntents: IntentDefinition[] = [
+  intent(
+    "guided_greeting",
+    "greeting",
+    ["hi", "hello", "hey", "good morning", "good evening"],
+    [
+      "Hello! How can I assist you today?",
+      "Hi there! What can I help you with?",
+      "Hey! Looking for product suggestions or order help?",
+      "Welcome! How may I assist you?",
+      "Hi! Ready to explore products?",
+      "Hello! Ask me anything.",
+      "Hey there! Need help choosing something?",
+      "Hi! I'm your support assistant.",
+      "Greetings! What do you need today?",
+      "Hello! Let's get started.",
+      "Hi! I can help with products, orders, and more.",
+      "Hey! Need recommendations?",
+      "Hello! How can I support you today?",
+      "Hi! Looking for something specific?",
+      "Hey! Tell me what you need.",
+      "Namaste! I can help you choose the right product.",
+      "Hi! Want me to suggest a best seller?"
+    ],
+    11
+  ),
+  intent(
+    "guided_product_recommendation",
+    "product_recommendation",
+    [
+      "suggest product",
+      "recommend product",
+      "what should i buy",
+      "best product",
+      "which product is best",
+      "i want to buy a product",
+      "suggest me a product",
+      "which will be the best product",
+      "buy product for me"
+    ],
+    [
+      "I can help with that. What category are you interested in?",
+      "Tell me your budget and I will suggest the best option.",
+      "Looking for performance, budget, or premium?",
+      "I recommend choosing based on your needs. What are you looking for?",
+      "We have several great options. Want affordable or premium?",
+      "Let me suggest something based on your usage.",
+      "Do you prefer budget-friendly or high-end products?",
+      "Tell me your requirements and I will recommend the best product.",
+      "I can suggest top-rated products for you.",
+      "What's your budget range?",
+      "Need a value-for-money option or top performance?",
+      "Let me guide you to the right product.",
+      "Best depends on your needs. Tell me more.",
+      "I can shortlist the best options for you.",
+      "Want trending or most affordable products?",
+      "For quick help, tell me: goal, budget, and flavor preference.",
+      "If you want, I can suggest one best and one affordable option.",
+      "I can recommend based on gym, running, hydration, or recovery goals."
+    ],
+    15
+  ),
+  intent(
+    "guided_affordable_products",
+    "affordable_products",
+    [
+      "cheap product",
+      "affordable product",
+      "budget product",
+      "low price",
+      "best under price",
+      "which will be the affordable product",
+      "best affordable product"
+    ],
+    [
+      "We have several budget-friendly options available.",
+      "Tell me your budget and I will suggest the best affordable product.",
+      "You can find great products at low prices in our catalog.",
+      "Affordable doesn't mean low quality. Want recommendations?",
+      "I can suggest the best value-for-money products.",
+      "Looking for something under a specific price?",
+      "Budget products are available with good features.",
+      "Let me show you the most affordable options.",
+      "You can filter products by price range.",
+      "Best budget picks are available. Need help choosing?",
+      "Affordable products are popular choices.",
+      "Let me recommend top low-cost items.",
+      "You can get quality products within your budget.",
+      "Want the cheapest or best value?",
+      "Budget-friendly options are available now.",
+      "Tell me your price cap and I will suggest 2-3 strong options.",
+      "I can suggest starter packs if you want lowest-cost entry."
+    ],
+    16
+  ),
+  intent(
+    "guided_premium_products",
+    "premium_products",
+    ["premium", "expensive product", "high quality", "best quality", "top quality product"],
+    [
+      "We offer premium products with top performance.",
+      "High-quality products are available with advanced features.",
+      "Premium options provide the best experience.",
+      "Looking for top-tier products?",
+      "Let me recommend high-end items.",
+      "Premium products are built for performance.",
+      "Top-rated products are available in premium range.",
+      "You will get the best quality in this category.",
+      "Want the best regardless of price?",
+      "Premium items offer durability and performance.",
+      "Luxury products are also available.",
+      "Top performance products are listed here.",
+      "High-end products deliver maximum value.",
+      "Premium category includes best sellers.",
+      "Let me guide you to the best quality products.",
+      "If quality is your priority, I can shortlist top-rated premium picks.",
+      "Share your goal and I will suggest the most effective premium option."
+    ],
+    15
+  ),
+  intent(
+    "guided_product_comparison",
+    "product_comparison",
+    ["compare", "difference", "which is better", "vs", "compare products", "product vs product"],
+    [
+      "I can compare products for you. Which ones?",
+      "Tell me the products you want to compare.",
+      "Comparison helps you choose better. What are your options?",
+      "Let me break down features for you.",
+      "Which product are you deciding between?",
+      "I will compare specs, price, and performance.",
+      "Tell me both product names.",
+      "I can highlight pros and cons.",
+      "Comparison makes decisions easier.",
+      "Let me help you pick the better option.",
+      "I will show differences clearly.",
+      "Want a quick comparison?",
+      "Tell me your choices.",
+      "I will suggest the best one for you.",
+      "Let's compare them step by step.",
+      "I can compare by budget, purpose, and ingredient profile.",
+      "Share two names and I will give a clear winner for your use case."
+    ],
+    15
+  ),
+  intent(
+    "guided_order_tracking",
+    "order_tracking",
+    ["track order", "where is my order", "order status", "track my shipment", "delivery update"],
+    [
+      "You can track your order using your order ID.",
+      "Go to the tracking page for updates.",
+      "Your order status is updated in real-time.",
+      "Check your email for tracking details.",
+      "Enter your order ID to track.",
+      "Tracking is available 24/7.",
+      "You will see delivery progress.",
+      "Order updates are automatic.",
+      "Track your order anytime.",
+      "Shipping details are shared via email.",
+      "Your order is on the way.",
+      "Tracking ensures transparency.",
+      "Stay updated with delivery info.",
+      "Use your registered email.",
+      "Let me help track your order.",
+      "Share your order ID and I will guide you to the latest status.",
+      "If tracking is not updating, I can help with support escalation."
+    ],
+    16
+  ),
+  intent(
+    "guided_order_issue",
+    "order_issue",
+    ["problem", "issue", "wrong order", "not delivered", "order problem", "damaged order"],
+    [
+      "Sorry for the inconvenience. Let me help.",
+      "Please share your order ID.",
+      "We will resolve this quickly.",
+      "Can you describe the issue?",
+      "We are here to fix this.",
+      "Your concern is important.",
+      "We will investigate immediately.",
+      "Let's solve this step by step.",
+      "Support team will assist you.",
+      "We apologize for the issue.",
+      "We will update you soon.",
+      "Thanks for reporting.",
+      "We will make it right.",
+      "Help is on the way.",
+      "We appreciate your patience.",
+      "Please share photos if item is damaged, that speeds up resolution.",
+      "I can route this issue to support with priority details."
+    ],
+    14
+  ),
+  intent(
+    "guided_payment",
+    "payment",
+    ["payment", "checkout", "transaction failed", "payment failed", "upi failed", "card declined"],
+    [
+      "We support secure payments.",
+      "Try again if payment failed.",
+      "Check your payment details.",
+      "Use card or wallet options.",
+      "Ensure sufficient balance.",
+      "Payment confirmation is instant.",
+      "Retry after a moment.",
+      "Transactions are encrypted.",
+      "We ensure safe checkout.",
+      "Payment issues can be resolved.",
+      "Contact support if needed.",
+      "Secure payment gateway is used.",
+      "Your payment is safe.",
+      "All transactions are verified.",
+      "Try another method if needed.",
+      "If amount was deducted but order failed, share transaction ID for help.",
+      "I can guide you through a quick payment troubleshooting checklist."
+    ],
+    15
+  ),
+  intent(
+    "guided_refund",
+    "returns",
+    ["refund", "return", "cancel order", "refund status", "replacement", "exchange"],
+    [
+      "You can request a refund within the return period.",
+      "Refunds are processed within a few days.",
+      "Check return policy for details.",
+      "You can cancel before shipping.",
+      "Refund goes to original payment method.",
+      "Return requests can be submitted online.",
+      "We ensure smooth refunds.",
+      "Track refund status easily.",
+      "Refund after verification.",
+      "Cancellation is simple.",
+      "Refund process is transparent.",
+      "Return shipping may apply.",
+      "Refund confirmation via email.",
+      "We handle returns efficiently.",
+      "Let me help with refund steps.",
+      "Share order ID and I can guide the fastest refund path.",
+      "If return is approved, refund timelines depend on payment mode."
+    ],
+    15
+  ),
+  intent(
+    "guided_unknown",
+    "unknown",
+    [],
+    unknownIntentResponses,
+    1
   ),
 ];
 
@@ -973,6 +1253,7 @@ const extendedFallbackIntents: IntentDefinition[] = fallbackTopics.map((item) =>
 const INTENTS: IntentDefinition[] = [
   ...greetingIntents,
   ...conversationalSupportIntents,
+  ...guidedCommerceIntents,
   ...baseBenefitIntents,
   ...extendedBenefitIntents,
   ...baseUsageIntents,
@@ -1109,6 +1390,13 @@ function pickIntentResponse(intentDef: IntentDefinition, message: string) {
   return intentDef.responses[index];
 }
 
+function pickUnknownFallbackResponse(message: string) {
+  const normalizedMessage = normalizeText(message);
+  const seed = normalizedMessage || "unknown";
+  const index = stableHash(`unknown:${seed}`) % unknownIntentResponses.length;
+  return unknownIntentResponses[index];
+}
+
 export function getRuleBasedReply(message: string): RuleAgentResult {
   const matchedIntent = findIntent(message);
 
@@ -1132,7 +1420,7 @@ export function getRuleBasedReply(message: string): RuleAgentResult {
 
   return {
     mode: "fallback",
-    message: withOptionsLine(FALLBACK_MESSAGE),
+    message: withOptionsLine(pickUnknownFallbackResponse(message) ?? FALLBACK_MESSAGE),
     quickReplies: QUICK_REPLIES,
   };
 }

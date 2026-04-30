@@ -23,7 +23,7 @@ export function useAddToCart() {
       clearPendingAction();
       flashAdded();
     }
-  }, [status, pendingAction]);
+  }, [status, pendingAction, addItem, clearPendingAction]);
 
   function flashAdded() {
     setAddState("added");

@@ -429,7 +429,6 @@ export function VoiceAgent() {
     return () => {
       try { rec.abort(); } catch { /* ignore */ }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sendMessage, scheduleMicRestart]);
 
   // ── startCall ──────────────────────────────────────────────────────────────
