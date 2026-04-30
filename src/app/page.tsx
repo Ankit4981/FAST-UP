@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, ShieldCheck, Sparkles, Star, Zap } from "lucide-react";
 
 import { CategorySections } from "@/components/home/CategorySections";
+import { FeatureOnboardingOverlay } from "@/components/home/FeatureOnboardingOverlay";
 import { FloatingAdvisorButton } from "@/components/home/FloatingAdvisorButton";
 import { HealthCalculatorSection } from "@/components/home/HealthCalculatorSection";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
@@ -40,6 +41,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <FeatureOnboardingOverlay />
       <HeroCarousel />
       <TrustBar />
       <StatsStrip />

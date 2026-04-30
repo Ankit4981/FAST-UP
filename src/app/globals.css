@@ -60,7 +60,7 @@ textarea {
   }
 }
 
-/* ── Auth Modal animation ───────────────────────────────────── */
+/* Auth Modal animation */
 @keyframes modal-in {
   from {
     opacity: 0;
@@ -75,7 +75,36 @@ textarea {
 .animate-modal-in {
   animation: modal-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-/* ──────────────────────────────────────────────────────────── */
+
+@keyframes onboarding-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes onboarding-pulse {
+  0%,
+  100% {
+    box-shadow: 0 10px 30px rgba(242, 101, 34, 0.16);
+  }
+  50% {
+    box-shadow: 0 14px 38px rgba(242, 101, 34, 0.28);
+  }
+}
+
+.animate-onboarding-in {
+  animation: onboarding-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-onboarding-pulse {
+  animation: onboarding-pulse 2.4s ease-in-out infinite;
+}
+/* End auth and onboarding animation helpers */
 
 @layer components {
   .container-page {
