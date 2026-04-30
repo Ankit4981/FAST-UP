@@ -30,6 +30,152 @@ export const seedProducts: Product[] = [
     imageAccent: "#1E90FF"
   },
   {
+    id: "prod_reload_salts_orange_5s",
+    slug: "reload-salts-orange-5s",
+    name: "Fast&Up Reload Salts+ Orange (5 Sachets)",
+    price: 162,
+    mrp: 180,
+    description:
+      "High-sodium electrolyte mix for fast hydration and energy during heavy sweating sessions.",
+    longDescription:
+      "Reload Salts+ Orange is a zero sugar, zero calorie high-sodium hydration mix with sodium, potassium, magnesium, calcium and chloride. Designed for workouts, sports, travel and hot-weather hydration support.",
+    images: ["/products/reload-salts-orange.webp"],
+    category: "Sports Nutrition",
+    rating: 4.7,
+    reviewCount: 1240,
+    tags: [
+      "hydration",
+      "electrolytes",
+      "high sodium",
+      "reload salts",
+      "zero sugar",
+      "during-workout"
+    ],
+    goalTags: ["hydration", "endurance", "recovery"],
+    flavours: [{ name: "Orange Salts", color: "#F97316" }],
+    badge: "High Sodium",
+    nutrition: [
+      "900 mg sodium",
+      "200 mg potassium",
+      "120 mg calcium",
+      "Magnesium + chloride",
+      "Zero sugar"
+    ],
+    howToUse: "Mix 1 sachet in 500 ml water and sip during or after activity.",
+    stock: 86,
+    featured: true,
+    imageAccent: "#F97316"
+  },
+  {
+    id: "prod_reload_salts_lemonade_5s",
+    slug: "reload-salts-lemonade-5s",
+    name: "Fast&Up Reload Salts+ Lemonade (5 Sachets)",
+    price: 162,
+    mrp: 180,
+    description:
+      "High-sodium lemonade electrolyte mix built for hydration support in intense or sweaty conditions.",
+    longDescription:
+      "Reload Salts+ Lemonade delivers essential electrolytes with a high-sodium profile for better fluid replenishment. It is a zero sugar, zero calorie hydration option when mixed in 500 ml water.",
+    images: ["/products/reload-salts-lemonade.webp"],
+    category: "Sports Nutrition",
+    rating: 4.7,
+    reviewCount: 1184,
+    tags: [
+      "hydration",
+      "electrolytes",
+      "high sodium",
+      "reload salts",
+      "zero sugar",
+      "lemonade"
+    ],
+    goalTags: ["hydration", "endurance", "recovery"],
+    flavours: [{ name: "Lemonade Salts", color: "#84CC16" }],
+    badge: "Zero Sugar",
+    nutrition: [
+      "900 mg sodium",
+      "200 mg potassium",
+      "120 mg calcium",
+      "Magnesium + chloride",
+      "Zero calories"
+    ],
+    howToUse: "Mix 1 sachet in 500 ml water and consume during or after training.",
+    stock: 74,
+    featured: true,
+    imageAccent: "#84CC16"
+  },
+  {
+    id: "prod_whey_essentials_chocolate_800g",
+    slug: "whey-essentials-chocolate-800g",
+    name: "Fast&Up Whey Essentials Chocolate (800g)",
+    price: 2479,
+    mrp: 2599,
+    description:
+      "Premium whey isolate + concentrate blend for post-workout muscle recovery and daily protein intake.",
+    longDescription:
+      "Whey Essentials combines whey concentrate and whey isolate with digestive enzymes and probiotics. Each serving delivers 24g protein with BCAA and glutamine support for recovery-focused training routines.",
+    images: ["/products/whey-essentials-chocolate.webp"],
+    category: "Sports Nutrition",
+    rating: 4.8,
+    reviewCount: 1896,
+    tags: ["whey", "protein", "muscle", "post-workout", "chocolate", "essentials"],
+    goalTags: ["muscle gain", "recovery", "strength"],
+    flavours: [{ name: "Rich Chocolate", color: "#5B3425" }],
+    badge: "24g Protein",
+    nutrition: ["24 g protein", "5.5 g BCAA", "4 g glutamine", "Enzymes + probiotics"],
+    howToUse: "Add 1 heaping scoop in 300-350 ml water, shake well and consume post-workout.",
+    stock: 41,
+    featured: true,
+    imageAccent: "#1D4ED8"
+  },
+  {
+    id: "prod_whey_isolate_rich_chocolate_930g",
+    slug: "whey-isolate-rich-chocolate-930g",
+    name: "Fast&Up Whey Isolate Rich Chocolate (930g)",
+    price: 4714,
+    mrp: 5069,
+    description:
+      "100% whey isolate-focused protein formula with zero added sugar for lean muscle recovery.",
+    longDescription:
+      "Fast&Up Whey Isolate is designed for advanced performance nutrition. It delivers 26g protein per serving with BCAA and glutamine support, and includes Pepzyme Pro for improved protein utilization.",
+    images: ["/products/whey-isolate-rich-chocolate.webp"],
+    category: "Sports Nutrition",
+    rating: 4.7,
+    reviewCount: 430,
+    tags: ["whey isolate", "protein", "muscle", "zero added sugar", "recovery", "chocolate"],
+    goalTags: ["muscle gain", "recovery", "strength"],
+    flavours: [{ name: "Rich Chocolate", color: "#6B3F2A" }],
+    badge: "26g Protein",
+    nutrition: ["26 g protein", "6 g BCAA", "4.5 g glutamine", "No amino spiking"],
+    howToUse: "Mix 1 scoop with 250-300 ml water or milk and consume after training.",
+    stock: 26,
+    featured: true,
+    imageAccent: "#EA580C"
+  },
+  {
+    id: "prod_reload_orange_rush_500ml",
+    slug: "reload-orange-rush-500ml",
+    name: "Fast&Up Reload Orange Rush Drink (500ml)",
+    price: 70,
+    mrp: 75,
+    description:
+      "Ready-to-drink zero sugar electrolyte beverage with 5 vital electrolytes for quick refreshment.",
+    longDescription:
+      "Reload Orange Rush is a convenient hydration drink for on-the-go use. It contains 5 vital electrolytes, is caffeine-free, and helps support hydration during active days.",
+    images: ["/products/reload-orange-rush-drink.webp"],
+    category: "Energy Drinks",
+    rating: 4.8,
+    reviewCount: 980,
+    tags: ["energy drink", "hydration", "electrolytes", "zero sugar", "orange rush", "ready to drink"],
+    goalTags: ["hydration", "energy", "endurance"],
+    flavours: [{ name: "Orange Rush", color: "#F97316" }],
+    badge: "RTD",
+    nutrition: ["5 vital electrolytes", "Zero sugar", "No caffeine", "500 ml bottle"],
+    howToUse: "Chill and drink directly. Best used before, during, or after activity.",
+    stock: 120,
+    featured: true,
+    imageAccent: "#2563EB"
+  },
+  {
     id: "prod_activate_preworkout",
     slug: "activate-pre-workout",
     name: "Activate Pre-Workout",

@@ -45,15 +45,16 @@ async function ensureProductsSeeded() {
   const count = await ProductModel.countDocuments();
 
   if (count === 0) {
-    // First time — insert all seed products
+    // First-time bootstrap.
     await ProductModel.insertMany(seedProducts);
   } else {
-    // Already seeded — sync images from seed to DB in case they were updated
+    // Keep DB in sync with the local catalog and add missing entries.
     await Promise.all(
       seedProducts.map((product) =>
         ProductModel.updateOne(
           { id: product.id },
-          { $set: { images: product.images } }
+          { $set: product },
+          { upsert: true }
         )
       )
     );

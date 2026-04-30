@@ -441,6 +441,28 @@ export function ExperienceEnhancements({ products }: { products: Product[] }) {
     () => products.filter((product) => compareIds.includes(product.id)),
     [compareIds, products]
   );
+  const compareCandidates = useMemo(() => {
+    const pool: Product[] = [];
+
+    if (bestPick) {
+      pool.push(bestPick);
+    }
+
+    personalized.forEach((product) => {
+      if (!pool.some((item) => item.id === product.id)) {
+        pool.push(product);
+      }
+    });
+
+    products.forEach((product) => {
+      if (pool.length >= 4) return;
+      if (!pool.some((item) => item.id === product.id)) {
+        pool.push(product);
+      }
+    });
+
+    return pool.slice(0, 4);
+  }, [bestPick, personalized, products]);
 
   const quizGoal = quizAnswers.goal ?? selectedGoal;
   const quizBudget = quizAnswers.budget ?? budgetTier;
@@ -481,6 +503,22 @@ export function ExperienceEnhancements({ products }: { products: Product[] }) {
     setQuizAnswers({});
     setQuizStep(0);
     setQuizTimeLeft(60);
+  }
+
+  function openCompareDrawer() {
+    if (compareCandidates.length === 0) {
+      setCompareOpen(true);
+      return;
+    }
+
+    setCompareIds((current) => {
+      if (current.length > 0) {
+        return current;
+      }
+      return compareCandidates.slice(0, 2).map((product) => product.id);
+    });
+
+    setCompareOpen(true);
   }
 
   return (
@@ -863,9 +901,36 @@ export function ExperienceEnhancements({ products }: { products: Product[] }) {
                 <ShieldCheck size={14} />
                 2. Compare Drawer • 4. Micro Animations • 8. Better Chat UX • 10. Seasonal Theme
               </p>
-              <button type="button" className="btn-secondary" onClick={() => setCompareOpen(true)}>
+              <button type="button" className="btn-secondary" onClick={openCompareDrawer}>
                 Open Compare ({compareIds.length})
               </button>
+            </div>
+            <div className="mt-3 rounded-xl border border-dashed border-neutral-300 bg-neutral-50 p-3">
+              <p className="text-[11px] font-black uppercase tracking-widest text-neutral-500">
+                Quick add for compare
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {compareCandidates.slice(0, 4).map((product) => (
+                  <button
+                    key={product.id}
+                    type="button"
+                    className={`chip ${
+                      compareIds.includes(product.id)
+                        ? "border-brand-orange bg-brand-orange/10 text-brand-orange"
+                        : ""
+                    }`}
+                    onClick={() => toggleCompare(product.id)}
+                  >
+                    {compareIds.includes(product.id) ? "Compared: " : "Compare: "}
+                    {product.name}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-neutral-500">
+                {compareIds.length < 2
+                  ? "Select at least 2 products for side-by-side comparison."
+                  : "Ready. Open compare to view side-by-side details."}
+              </p>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-3">
@@ -908,7 +973,21 @@ export function ExperienceEnhancements({ products }: { products: Product[] }) {
               <div className="p-6">
                 <div className="rounded-xl border border-dashed border-neutral-300 bg-neutral-50 p-8 text-center">
                   <p className="font-semibold text-brand-black">No products selected for comparison.</p>
-                  <p className="mt-2 text-sm text-neutral-500">Use “Compare” buttons from cards to add products.</p>
+                  <p className="mt-2 text-sm text-neutral-500">Use compare chips below to add products.</p>
+                  {compareCandidates.length > 0 ? (
+                    <div className="mt-4 flex flex-wrap justify-center gap-2">
+                      {compareCandidates.slice(0, 4).map((product) => (
+                        <button
+                          key={product.id}
+                          type="button"
+                          className="chip"
+                          onClick={() => toggleCompare(product.id)}
+                        >
+                          Compare {product.name}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             ) : (

@@ -21,7 +21,13 @@ const navItems = [
     label: "Sports",
     href: "/products?category=Sports+Nutrition",
     category: "Sports Nutrition",
-    children: ["Hydration", "Recovery", "BCAA", "Endurance"]
+    children: [
+      "Reload Salts+ Orange",
+      "Reload Salts+ Lemonade",
+      "Whey Essentials",
+      "Whey Isolate",
+      "Recovery"
+    ]
   },
   {
     label: "Daily",
@@ -40,6 +46,12 @@ const navItems = [
     href: "/products?category=Plant+Power",
     category: "Plant Power",
     children: ["Protein", "Vegan", "Muscle"]
+  },
+  {
+    label: "Drinks",
+    href: "/products?category=Energy+Drinks",
+    category: "Energy Drinks",
+    children: ["Orange Rush", "Hydration Drink", "Zero Sugar", "Electrolytes"]
   },
   {
     label: "Bundles",
