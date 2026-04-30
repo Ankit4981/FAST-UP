@@ -448,6 +448,24 @@ const guidedCommerceIntents: IntentDefinition[] = [
     11
   ),
   intent(
+    "guided_best_product_direct",
+    "product_recommendation",
+    [
+      "what will be the best product of fast and up",
+      "best product of fast and up",
+      "best product of fast up",
+      "best fastandup product",
+      "which is the best product of fast and up",
+      "best product"
+    ],
+    [
+      "Best Fast&Up overall picks: 1) Fast&Up Reload (hydration + endurance), 2) Fast&Up Whey Protein (muscle + recovery), 3) Fast&Up Vitamin C (daily immunity). If you want one all-rounder, choose Fast&Up Reload.",
+      "Top Fast&Up products right now: Fast&Up Reload for hydration, Fast&Up Whey Protein for muscle goals, and Fast&Up Vitamin C for daily wellness.",
+      "Straight answer: the best all-round Fast&Up product is Fast&Up Reload. For premium muscle goals, choose Fast&Up Whey Protein."
+    ],
+    22
+  ),
+  intent(
     "guided_product_recommendation",
     "product_recommendation",
     [
@@ -470,24 +488,16 @@ const guidedCommerceIntents: IntentDefinition[] = [
       "suggest supplement"
     ],
     [
-      "I can help with that. What category are you interested in?",
-      "Tell me your budget and I will suggest the best option.",
-      "Looking for performance, budget, or premium?",
-      "I recommend choosing based on your needs. What are you looking for?",
-      "We have several great options. Want affordable or premium?",
-      "Let me suggest something based on your usage.",
-      "Do you prefer budget-friendly or high-end products?",
-      "Tell me your requirements and I will recommend the best product.",
-      "I can suggest top-rated products for you.",
-      "What's your budget range?",
-      "Need a value-for-money option or top performance?",
-      "Let me guide you to the right product.",
-      "Best depends on your needs. Tell me more.",
-      "I can shortlist the best options for you.",
-      "Want trending or most affordable products?",
-      "For quick help, tell me: goal, budget, and flavor preference.",
-      "If you want, I can suggest one best and one affordable option.",
-      "I can recommend based on gym, running, hydration, or recovery goals."
+      "Top picks: Fast&Up Reload (hydration), Fast&Up Whey Protein (muscle gain), and Fast&Up Vitamin C (daily immunity).",
+      "If you want a direct recommendation: choose Fast&Up Reload for daily hydration and performance.",
+      "Best premium route: Fast&Up Whey Protein + Recover BCAA + Glutamine. Best value route: Reload + Vitamin C.",
+      "For straightforward buying: Fast&Up Reload is the safest all-round choice, and Whey Protein is best for muscle goals.",
+      "Recommended shortlist: Fast&Up Reload, Fast&Up Whey Protein, and Plant Protein Performance.",
+      "For hydration-focused users, I recommend Fast&Up Reload first.",
+      "If your goal is performance and recovery, go with Fast&Up Whey Protein and Recover BCAA + Glutamine.",
+      "If you want a clean daily option, choose Fast&Up Vitamin C or Vitalize Multivitamin.",
+      "For balanced results, buy Fast&Up Reload + Fast&Up Whey Protein as a two-product stack.",
+      "My direct recommendation set: Reload for hydration, Whey for muscle, Vitamin C for daily immunity."
     ],
     15
   ),
@@ -511,23 +521,11 @@ const guidedCommerceIntents: IntentDefinition[] = [
       "budget option"
     ],
     [
-      "We have several budget-friendly options available.",
-      "Tell me your budget and I will suggest the best affordable product.",
-      "You can find great products at low prices in our catalog.",
-      "Affordable doesn't mean low quality. Want recommendations?",
-      "I can suggest the best value-for-money products.",
-      "Looking for something under a specific price?",
-      "Budget products are available with good features.",
-      "Let me show you the most affordable options.",
-      "You can filter products by price range.",
-      "Best budget picks are available. Need help choosing?",
-      "Affordable products are popular choices.",
-      "Let me recommend top low-cost items.",
-      "You can get quality products within your budget.",
-      "Want the cheapest or best value?",
-      "Budget-friendly options are available now.",
-      "Tell me your price cap and I will suggest 2-3 strong options.",
-      "I can suggest starter packs if you want lowest-cost entry."
+      "Best value-for-money Fast&Up options: Fast&Up Vitamin C, Vitalize Multivitamin, and Fast&Up Reload.",
+      "Affordable direct picks: 1) Fast&Up Vitamin C, 2) Vitalize Multivitamin, 3) Fast&Up Reload.",
+      "If budget is your priority, start with Fast&Up Reload for hydration and Fast&Up Vitamin C for daily support.",
+      "For low-cost but effective choices, choose Vitalize Multivitamin and Fast&Up Vitamin C.",
+      "Straight budget recommendation: Fast&Up Reload is the best value hydration product."
     ],
     16
   ),
@@ -547,23 +545,11 @@ const guidedCommerceIntents: IntentDefinition[] = [
       "high performance option"
     ],
     [
-      "We offer premium products with top performance.",
-      "High-quality products are available with advanced features.",
-      "Premium options provide the best experience.",
-      "Looking for top-tier products?",
-      "Let me recommend high-end items.",
-      "Premium products are built for performance.",
-      "Top-rated products are available in premium range.",
-      "You will get the best quality in this category.",
-      "Want the best regardless of price?",
-      "Premium items offer durability and performance.",
-      "Luxury products are also available.",
-      "Top performance products are listed here.",
-      "High-end products deliver maximum value.",
-      "Premium category includes best sellers.",
-      "Let me guide you to the best quality products.",
-      "If quality is your priority, I can shortlist top-rated premium picks.",
-      "Share your goal and I will suggest the most effective premium option."
+      "Best premium Fast&Up picks: Fast&Up Whey Protein, Plant Protein Performance, and Recover BCAA + Glutamine.",
+      "For premium quality, choose Fast&Up Whey Protein first. Then add Recover BCAA + Glutamine for recovery.",
+      "Top performance premium stack: Activate Pre-Workout + Fast&Up Whey Protein + Recover BCAA + Glutamine.",
+      "Straight premium recommendation: Fast&Up Whey Protein is the best premium product for muscle and recovery goals.",
+      "If you want premium hydration + performance, choose Fast&Up Reload with Fast&Up Whey Protein."
     ],
     15
   ),
