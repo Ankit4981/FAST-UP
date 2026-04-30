@@ -153,6 +153,7 @@ export default async function HomePage() {
               Open Calculator
             </a>
             <Link
+              id="feature-ai-advisor"
               href="/fastandup-advisor.html"
               className="btn-secondary border-white/30 bg-white/10 px-8 py-3 text-base text-white hover:border-white hover:bg-white hover:text-brand-black"
             >
