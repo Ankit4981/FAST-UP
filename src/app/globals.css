@@ -135,6 +135,49 @@ textarea {
   opacity: 1;
   transform: translateY(0);
 }
+
+@keyframes bot-eye-look {
+  0%,
+  100% {
+    transform: translateX(-1px) translateY(0);
+  }
+  25% {
+    transform: translateX(1.25px) translateY(0.3px);
+  }
+  50% {
+    transform: translateX(0.6px) translateY(-0.35px);
+  }
+  75% {
+    transform: translateX(-1.2px) translateY(0.25px);
+  }
+}
+
+@keyframes bot-eye-blink {
+  0%,
+  42%,
+  47%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  44%,
+  94% {
+    transform: scaleY(0.08);
+  }
+}
+
+.live-bot-eye {
+  transform-origin: center;
+  animation: bot-eye-blink 4.6s ease-in-out infinite;
+}
+
+.live-bot-pupil {
+  animation: bot-eye-look 2.9s ease-in-out infinite;
+}
+
+.live-bot-pupil-delay {
+  animation-delay: 0.18s;
+}
 /* End auth and onboarding animation helpers */
 
 @layer components {

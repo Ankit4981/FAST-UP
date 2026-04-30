@@ -24,40 +24,82 @@ const navItems = [
     children: [
       "Reload Salts+ Orange",
       "Reload Salts+ Lemonade",
-      "Whey Essentials",
-      "Whey Isolate",
-      "Recovery"
+      "Recover BCAA + Glutamine",
+      "Fast&Up EAA 9 Amino Lemon",
+      "Fast&Up Whey Hydro Clear Lime",
+      "Fast&Up Casein Night Protein Chocolate",
+      "Fast&Up Electrolyte Stick Lychee",
+      "Fast&Up Electrolyte Stick Cola"
     ]
   },
   {
     label: "Daily",
     href: "/products?category=Daily+Nutrition",
     category: "Daily Nutrition",
-    children: ["Multivitamin", "Immunity", "Wellness"]
+    children: [
+      "Multivitamin",
+      "Immunity",
+      "Wellness",
+      "Fast&Up Magnesio Sleep Recovery",
+      "Fast&Up Probiotic Gut Balance",
+      "Fast&Up JointFlex UC-II + D3",
+      "Fast&Up Turmeric Curcumin Gold",
+      "Fast&Up Daily Greens + Fiber"
+    ]
   },
   {
     label: "Women",
     href: "/products?category=Women%27s+Nutrition",
     category: "Women's Nutrition",
-    children: ["Beauty", "Collagen", "Daily Care"]
+    children: [
+      "Beauty",
+      "Collagen",
+      "Daily Care",
+      "Fast&Up Iron Max Women Active",
+      "Fast&Up Women PCOS Balance",
+      "Skin Glow",
+      "Women Wellness"
+    ]
   },
   {
     label: "Protein",
     href: "/products?category=Plant+Power",
     category: "Plant Power",
-    children: ["Protein", "Vegan", "Muscle"]
+    children: [
+      "Protein",
+      "Vegan",
+      "Muscle",
+      "Plant Protein Performance",
+      "Fast&Up Vegan BCAA Berry",
+      "Daily Vegan Protein",
+      "Plant Recovery Support"
+    ]
   },
   {
     label: "Drinks",
     href: "/products?category=Energy+Drinks",
     category: "Energy Drinks",
-    children: ["Orange Rush", "Hydration Drink", "Zero Sugar", "Electrolytes"]
+    children: [
+      "Orange Rush",
+      "Hydration Drink",
+      "Zero Sugar",
+      "Electrolytes",
+      "Fast&Up Carb Energy Mix Orange",
+      "Fast&Up L-Carnitine Shot Mango"
+    ]
   },
   {
     label: "Bundles",
     href: "/products?category=Bundles",
     category: "Bundles",
-    children: ["Race Day", "Value Packs", "Starter Kits"]
+    children: [
+      "Race Day",
+      "Value Packs",
+      "Starter Kits",
+      "Fast&Up Recovery Combo Pack Plus",
+      "Fast&Up Endurance Race Kit Pro",
+      "Marathon Hydration Bundle"
+    ]
   }
 ];
 

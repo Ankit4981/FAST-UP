@@ -48,7 +48,9 @@ async function ensureProductsSeeded() {
     // First-time bootstrap.
     await ProductModel.insertMany(seedProducts);
   } else {
-    // Keep DB in sync with the local catalog and add missing entries.
+    // Keep DB in sync with the local catalog:
+    // 1) upsert every seed item
+    // 2) remove products that no longer exist in local seed data
     await Promise.all(
       seedProducts.map((product) =>
         ProductModel.updateOne(
@@ -58,6 +60,9 @@ async function ensureProductsSeeded() {
         )
       )
     );
+
+    const seedIds = seedProducts.map((product) => product.id);
+    await ProductModel.deleteMany({ id: { $nin: seedIds } });
   }
 }
 

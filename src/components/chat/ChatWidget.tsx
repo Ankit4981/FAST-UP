@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Bot,
   ChevronLeft,
   Loader2,
   MessageCircle,
@@ -46,6 +45,34 @@ const STARTER_MESSAGES: ChatMessage[] = [
     content: START_GREETING,
   },
 ];
+
+function LiveBotAvatar({ size = "md" }: { size?: "sm" | "md" }) {
+  const shellSize = size === "sm" ? "h-8 w-8" : "h-9 w-9";
+  const eyeSize = size === "sm" ? "h-3 w-3" : "h-3.5 w-3.5";
+
+  return (
+    <span
+      aria-hidden
+      className={`relative inline-flex ${shellSize} items-center justify-center rounded-full bg-white shadow-[inset_0_1px_2px_rgba(15,23,42,0.18)]`}
+    >
+      <span className="absolute -top-1 h-1.5 w-4 rounded-full bg-white/95" />
+      <span className="absolute -top-2 h-1 w-1 rounded-full bg-brand-orange" />
+      <span className="relative z-[1] flex items-center gap-1">
+        <span
+          className={`live-bot-eye relative flex ${eyeSize} items-center justify-center overflow-hidden rounded-full bg-neutral-200`}
+        >
+          <span className="live-bot-pupil h-1.5 w-1.5 rounded-full bg-brand-orange" />
+        </span>
+        <span
+          className={`live-bot-eye relative flex ${eyeSize} items-center justify-center overflow-hidden rounded-full bg-neutral-200`}
+        >
+          <span className="live-bot-pupil live-bot-pupil-delay h-1.5 w-1.5 rounded-full bg-brand-orange" />
+        </span>
+      </span>
+      <span className="absolute bottom-2 h-0.5 w-3 rounded-full bg-neutral-300" />
+    </span>
+  );
+}
 
 function WaveBars({ active }: { active: boolean }) {
   const heights = active ? ["h-2", "h-5", "h-7", "h-5", "h-2"] : ["h-1", "h-1", "h-1", "h-1", "h-1"];
@@ -453,7 +480,7 @@ export function ChatWidget() {
           onClick={() => setOpen(true)}
           className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-brand-orange text-white shadow-lift hover:bg-brand-orangeDark"
         >
-          <Bot size={24} />
+          <LiveBotAvatar size="sm" />
         </button>
       )}
 
@@ -467,7 +494,7 @@ export function ChatWidget() {
               <header className="flex items-center justify-between border-b border-neutral-200 bg-white px-4 py-3">
                 <div className="flex items-center gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-orange text-white">
-                    <Bot size={22} aria-hidden />
+                    <LiveBotAvatar />
                   </span>
                   <div>
                     <h2 className="text-sm font-bold text-brand-black">Fast&Up Assistant</h2>
@@ -526,7 +553,7 @@ export function ChatWidget() {
                     <ChevronLeft size={18} />
                   </button>
                   <span className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-orange text-white">
-                    <Bot size={22} aria-hidden />
+                    <LiveBotAvatar />
                   </span>
                   <div>
                     <h2 className="text-sm font-bold text-brand-black">Fast&Up Assistant Rahul</h2>
