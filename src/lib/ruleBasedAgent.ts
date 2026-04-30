@@ -45,6 +45,11 @@ export type RuleAgentResult = {
   matchedIntentId?: string;
 };
 
+export type RuleAgentMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
 const QUICK_REPLIES = ["Product benefits", "How to use", "Track order", "Offers"];
 
 const OPTIONS_LINE =
@@ -499,7 +504,11 @@ const guidedCommerceIntents: IntentDefinition[] = [
       "best affordable product",
       "cheap supplement",
       "affordable supplement",
-      "budget supplement"
+      "budget supplement",
+      "value for money",
+      "value for money option",
+      "value option",
+      "budget option"
     ],
     [
       "We have several budget-friendly options available.",
@@ -525,7 +534,18 @@ const guidedCommerceIntents: IntentDefinition[] = [
   intent(
     "guided_premium_products",
     "premium_products",
-    ["premium", "expensive product", "high quality", "best quality", "top quality product", "premium supplement", "best quality supplement"],
+    [
+      "premium",
+      "expensive product",
+      "high quality",
+      "best quality",
+      "top quality product",
+      "premium supplement",
+      "best quality supplement",
+      "top performance",
+      "top performance option",
+      "high performance option"
+    ],
     [
       "We offer premium products with top performance.",
       "High-quality products are available with advanced features.",
@@ -1479,6 +1499,82 @@ function findIntent(message: string): IntentDefinition | null {
   return candidates[0].intent;
 }
 
+function findIntentById(id: string) {
+  return INTENTS.find((intentDef) => intentDef.id === id) ?? null;
+}
+
+function resolveContextualFollowUp(
+  message: string,
+  history: RuleAgentMessage[] | undefined
+) {
+  if (!history || history.length === 0) {
+    return null;
+  }
+
+  const normalizedMessage = normalizeText(message);
+  if (!normalizedMessage) {
+    return null;
+  }
+
+  const lastAssistantMessage = [...history]
+    .reverse()
+    .find((entry) => entry.role === "assistant")
+    ?.content;
+
+  if (!lastAssistantMessage) {
+    return null;
+  }
+
+  const normalizedAssistantMessage = normalizeText(lastAssistantMessage);
+
+  const valueForMoneySignals = [
+    "value for money",
+    "budget",
+    "affordable",
+    "cheapest",
+    "cheap",
+    "low price",
+    "value option",
+  ];
+
+  const premiumSignals = [
+    "top performance",
+    "best performance",
+    "premium",
+    "high quality",
+    "best quality",
+    "high performance",
+  ];
+
+  const hasValueSignal = valueForMoneySignals.some((signal) =>
+    normalizedMessage.includes(signal)
+  );
+  const hasPremiumSignal = premiumSignals.some((signal) =>
+    normalizedMessage.includes(signal)
+  );
+
+  const recommendationPromptSignals = [
+    "value for money option or top performance",
+    "affordable or premium",
+    "budget friendly or high end",
+    "best depends on your needs",
+  ];
+
+  const promptedForPreference = recommendationPromptSignals.some((signal) =>
+    normalizedAssistantMessage.includes(signal)
+  );
+
+  if (hasValueSignal || (promptedForPreference && normalizedMessage.includes("value"))) {
+    return findIntentById("guided_affordable_products");
+  }
+
+  if (hasPremiumSignal || (promptedForPreference && normalizedMessage.includes("performance"))) {
+    return findIntentById("guided_premium_products");
+  }
+
+  return null;
+}
+
 function stableHash(value: string) {
   let hash = 0;
   for (let i = 0; i < value.length; i += 1) {
@@ -1509,8 +1605,11 @@ function pickUnknownFallbackResponse(message: string) {
   return unknownIntentResponses[index];
 }
 
-export function getRuleBasedReply(message: string): RuleAgentResult {
-  const matchedIntent = findIntent(message);
+export function getRuleBasedReply(
+  message: string,
+  history?: RuleAgentMessage[]
+): RuleAgentResult {
+  const matchedIntent = findIntent(message) ?? resolveContextualFollowUp(message, history);
 
   if (matchedIntent) {
     const response = pickIntentResponse(matchedIntent, message);

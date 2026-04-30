@@ -278,7 +278,7 @@ export function FeatureOnboardingOverlay() {
             setArrowMarker(null);
             setOpen(true);
           }}
-          className="fixed bottom-5 right-5 z-[85] inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-white/90 px-4 py-2 text-xs font-black uppercase tracking-wider text-brand-orange shadow-lift backdrop-blur-sm transition hover:border-brand-orange hover:bg-white animate-onboarding-pulse"
+          className="fixed bottom-5 right-5 z-[45] inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-white/90 px-4 py-2 text-xs font-black uppercase tracking-wider text-brand-orange shadow-lift backdrop-blur-sm transition hover:border-brand-orange hover:bg-white animate-onboarding-pulse"
         >
           <Sparkles size={14} />
           Revisit Feature Guide

@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   }
 
   const latestMessage = parsed.data.messages.at(-1)?.content ?? "";
-  const result = getRuleBasedReply(latestMessage);
+  const result = getRuleBasedReply(latestMessage, parsed.data.messages);
 
   return NextResponse.json(
     {
