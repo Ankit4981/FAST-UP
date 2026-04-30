@@ -63,6 +63,8 @@ const goalOptions: Array<{ value: GoalKey; label: string }> = [
   { value: "immunity", label: "Immunity & Wellness" }
 ];
 
+const CALCULATOR_PROFILE_KEY = "fastup-health-calculator-profile-v1";
+
 const defaultForm: FormState = {
   age: 27,
   gender: "male",
@@ -143,6 +145,20 @@ export function HealthCalculatorSection({ products }: HealthCalculatorSectionPro
     const normalizedForm = normalizeCalculatorForm(form);
     setForm(normalizedForm);
     setSubmittedForm(normalizedForm);
+
+    try {
+      const snapshot = {
+        goal: normalizedForm.goal,
+        diet: normalizedForm.diet,
+        activity: normalizedForm.activity,
+        weightKg: normalizedForm.weightKg,
+        updatedAt: new Date().toISOString(),
+      };
+      window.localStorage.setItem(CALCULATOR_PROFILE_KEY, JSON.stringify(snapshot));
+      window.dispatchEvent(new CustomEvent("fastup:profile-updated", { detail: snapshot }));
+    } catch {
+      // no-op
+    }
   }
 
   function handleFoodAnalyze(nextLog: string) {

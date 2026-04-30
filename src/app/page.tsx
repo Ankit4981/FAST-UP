@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, ShieldCheck, Sparkles, Star, Zap } from "lucide-react";
 
 import { CategorySections } from "@/components/home/CategorySections";
+import { ExperienceEnhancements } from "@/components/home/ExperienceEnhancements";
 import { FeatureOnboardingOverlay } from "@/components/home/FeatureOnboardingOverlay";
 import { FloatingAdvisorButton } from "@/components/home/FloatingAdvisorButton";
 import { HealthCalculatorSection } from "@/components/home/HealthCalculatorSection";
@@ -47,6 +48,7 @@ export default async function HomePage() {
       <StatsStrip />
       <CategorySections />
       <HealthCalculatorSection products={allProducts} />
+      <ExperienceEnhancements products={allProducts} />
 
       <section className="section-shell bg-white" id="featured-products" aria-label="Featured products">
         <div className="container-page">

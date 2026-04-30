@@ -25,13 +25,20 @@ type ChatApiResponse = {
 };
 
 const STORAGE_KEY = "fastandup-rule-chat-history";
-const STARTER_QUICK_REPLIES = ["Product benefits", "How to use", "Track order", "Offers"];
+const STARTER_QUICK_REPLIES = [
+  "Recommend product",
+  "Energy",
+  "Hydration",
+  "Muscle",
+  "Product benefits",
+  "How to use",
+  "Track order",
+  "Offers",
+];
 const START_GREETING = "Namaste! I am Rahul from Fast&Up. How can I help you today?";
-const OPTIONS_GUIDE =
-  "You can ask about: Product benefits, How to use, Track order, Offers";
 const CALL_OPENING_SCRIPT = START_GREETING;
 const FALLBACK_MESSAGE =
-  "I'm sorry, I didn't understand that. You can ask about benefits, usage, orders, or offers.";
+  "I did not fully get that. Are you looking for:\n- Product recommendation\n- Usage\n- Order help\n- Offers";
 
 const STARTER_MESSAGES: ChatMessage[] = [
   {
@@ -58,6 +65,57 @@ function WaveBars({ active }: { active: boolean }) {
   );
 }
 
+function dedupeQuickReplies(items: string[], limit = 8) {
+  const normalized = new Set<string>();
+  const result: string[] = [];
+
+  for (const item of items) {
+    const key = item.trim().toLowerCase();
+    if (!key || normalized.has(key)) continue;
+    normalized.add(key);
+    result.push(item);
+    if (result.length >= limit) break;
+  }
+
+  return result;
+}
+
+function getFollowUpQuickReplies(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("value-for-money") ||
+    normalized.includes("affordable") ||
+    normalized.includes("premium") ||
+    normalized.includes("top performance")
+  ) {
+    return [
+      "Value for money option",
+      "Premium",
+      "Best product of Fast&Up",
+      "Hydration product",
+    ];
+  }
+
+  if (
+    normalized.includes("track your order") ||
+    normalized.includes("order id") ||
+    normalized.includes("delivery")
+  ) {
+    return ["Track order", "Order issue", "Refund", "Contact support"];
+  }
+
+  if (
+    normalized.includes("offer") ||
+    normalized.includes("discount") ||
+    normalized.includes("coupon")
+  ) {
+    return ["Offers", "Any discount now", "Coupon code", "Combo savings"];
+  }
+
+  return [];
+}
+
 async function fetchRuleBasedReply(messages: ChatMessage[], endpoint: "/api/chat" | "/api/voice") {
   const response = await fetch(endpoint, {
     method: "POST",
@@ -76,7 +134,7 @@ async function fetchRuleBasedReply(messages: ChatMessage[], endpoint: "/api/chat
   const payload = (await response.json()) as ChatApiResponse;
 
   return {
-    message: payload.message ?? `${FALLBACK_MESSAGE}\n${OPTIONS_GUIDE}`,
+    message: payload.message ?? FALLBACK_MESSAGE,
     quickReplies:
       payload.quickReplies && payload.quickReplies.length > 0
         ? payload.quickReplies
@@ -347,13 +405,19 @@ export function ChatWidget() {
       );
 
       setMessages((current) => [...current, { role: "assistant", content: message }]);
-      setQuickReplies(nextQuickReplies);
+      setQuickReplies(
+        dedupeQuickReplies([
+          ...getFollowUpQuickReplies(message),
+          ...nextQuickReplies,
+          ...STARTER_QUICK_REPLIES,
+        ])
+      );
     } catch {
       setMessages((current) => [
         ...current,
         {
           role: "assistant",
-          content: `${FALLBACK_MESSAGE}\n${OPTIONS_GUIDE}`,
+          content: FALLBACK_MESSAGE,
         },
       ]);
       setQuickReplies(STARTER_QUICK_REPLIES);

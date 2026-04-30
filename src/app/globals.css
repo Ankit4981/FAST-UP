@@ -121,6 +121,20 @@ textarea {
   outline-offset: 4px;
   animation: feature-target-pulse 1.2s ease-in-out infinite;
 }
+
+.ux-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--ux-delay, 0ms);
+}
+
+.ux-reveal.ux-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
 /* End auth and onboarding animation helpers */
 
 @layer components {
