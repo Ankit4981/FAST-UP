@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Rajdhani, Sora } from "next/font/google";
 import type { ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/next";
 
 import { ChatWidgetClient } from "@/components/chat/ChatWidgetClient";
 import { Footer } from "@/components/layout/Footer";
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Footer />
           <ChatWidgetClient />
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
